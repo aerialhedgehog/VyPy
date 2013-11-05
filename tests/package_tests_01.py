@@ -55,7 +55,7 @@ def fit_2D():
     
     # training
     nt = 20 # number of samples
-    X = ViPy.sbo.tools.LHC_uniform(XB,nt)
+    X = ViPy.tools.LHC_uniform(XB,nt)
     Y,DY = The_Func(X)
     
     # zip data to evaluate
