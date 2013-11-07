@@ -8,4 +8,4 @@ import plotting
 import parallel
 import optimize
 
-#import regression
+import regression

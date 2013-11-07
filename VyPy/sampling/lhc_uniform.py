@@ -2,6 +2,8 @@
 import numpy as np
 import scipy as sp
 
+from VyPy.tools import vector_distance, check_array
+
 def lhc_uniform(XB,NI,XI=None,maxits=100):
     ''' Latin Hypercube Sampling with uniform density
         iterates to maximize minimum L2 distance

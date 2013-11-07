@@ -1,17 +1,24 @@
 
 from VyPy.optimize import Driver
+import numpy
 
+try:
+    import cma
+    is_loaded = True
+except ImportError:
+    from VyPy.plugins import cma
+    is_loaded = True
+except ImportError:
+    is_loaded = False
+    
 # ----------------------------------------------------------------------
 #   Covariance Matrix Adaptation - Evolutionary Strategy
 # ----------------------------------------------------------------------
 class CMA_ES(Driver):
     def __init__(self,iprint=1., rho_scl = 0.10, n_eval=None):
         
-        try:
-            import cma
-        except ImportError:
+        if not is_loaded:
             raise ImportError, 'Could not import cma, please install from: https://www.lri.fr/~hansen/cma.py'
-        import numpy
         
         self.iprint  = iprint
         self.rho_scl = rho_scl
@@ -26,8 +33,6 @@ class CMA_ES(Driver):
         assert len(problem.objectives) == 1 , 'too many objectives'
         
         # optimizer
-        import cma
-        import numpy
         optimizer = cma.fmin
         
         # inputs

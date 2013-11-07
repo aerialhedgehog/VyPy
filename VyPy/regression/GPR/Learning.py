@@ -2,6 +2,7 @@
 import numpy as np
 import scipy as sp
 import scipy.linalg
+import copy
 
 from VyPy import optimize, tools, EvaluationFailure
 
@@ -149,11 +150,11 @@ class Learning(object):
             Hypers.update(hypers)
     
             # unpack hypers
-            Hypers.update(Hyp_dict)
-            sig_f   = Hypers.sig_f
-            len_s   = Hypers.len_s
-            sig_ny  = Hypers.sig_ny
-            sig_ndy = Hypers.sig_ndy   
+            Hypers.update(hypers)
+            sig_f   = Hypers['sig_f']
+            len_s   = Hypers['len_s']
+            sig_ny  = Hypers['sig_ny']
+            sig_ndy = Hypers['sig_ndy']
             
             # noise ratios
             noise_ratio_y   = sig_ny  - sig_f
@@ -200,9 +201,9 @@ class Learning(object):
         
         # Run Global Optimization
         print 'Global Optimization (CMA_ES)'
-        driver = opt.drivers.CMA_ES( rho_scl = 0.10  ,
-                                     n_eval  = 1000 ,
-                                     iprint  = 0     )
+        driver = optimize.drivers.CMA_ES( rho_scl = 0.10  ,
+                                          n_eval  = 1000 ,
+                                          iprint  = 0     )
         [logP_min,Hyp_min,result] = driver.run(problem)
         
         # setup next problem
@@ -211,7 +212,7 @@ class Learning(object):
         
         # Run Local Refinement
         print 'Local Optimization (SLSQP)'
-        driver = opt.drivers.scipy.SLSQP( iprint = 0 )   
+        driver = optimize.drivers.scipy.SLSQP( iprint = 0 )   
         [logP_min,Hyp_min,result] = driver.run(problem)
         
         #print 'Local Optimization (COBYLA)'

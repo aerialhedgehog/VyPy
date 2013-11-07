@@ -2,6 +2,7 @@
 import os, shutil, sys, copy
 
 from VyPy.tools.arrays import array_type, matrix_type
+from VyPy.tools import OrderedDict as odict
 
 iterable_type = (list,tuple,array_type,matrix_type)
 

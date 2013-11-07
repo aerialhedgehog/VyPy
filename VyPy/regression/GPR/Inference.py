@@ -1,6 +1,9 @@
 
+import numpy as np
+import scipy as sp
 
 from VyPy import tools, EvaluationFailure
+from VyPy.tools import check_array
 
 class Inference(object):
     
@@ -38,7 +41,7 @@ class Inference(object):
             #print 'cholesky decomposition failed during precalc'
             raise EvaluationFailure , 'cholesky decomposition failed during precalc'
         
-        return L, al, Yt
+        return self.L, self.al, self.Yt
     
     #: def precalc()
     

@@ -6,10 +6,7 @@ import scipy as sp
 import scipy.linalg
 
 from VyPy import EvaluationFailure
-from VyPy.tools import IndexableDict
-
-import tools
-from tools import vector_distance, check_array
+from VyPy.tools import IndexableDict, vector_distance, check_array
 
 
 class Modeling(object):

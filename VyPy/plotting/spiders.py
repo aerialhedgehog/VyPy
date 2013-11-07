@@ -7,6 +7,8 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 import matplotlib.pyplot as plt
 
+from VyPy.tools import check_array, vector_distance
+
 def spider_axis(FIG,X0,XB):
 
     X0 = check_array(X0,'row')

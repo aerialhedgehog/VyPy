@@ -4,7 +4,7 @@ from Evaluator import Evaluator
 # ----------------------------------------------------------------------
 #   Inequality Function
 # ----------------------------------------------------------------------
-class Inequality(object):
+class Inequality(Evaluator):
     def __init__(self,constraint,variables):
         
         Evaluator.__init__(self)
