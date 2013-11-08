@@ -69,7 +69,11 @@ class Learning(object):
             ['len_s'   , (len_lo,Hypers['len_s']  ,len_hi), 1.0 ] ,
             ['sig_ny'  , (nze_lo,Hypers['sig_ny'] ,nze_hi), 1.0 ] ,
             ['sig_ndy' , (nze_lo,Hypers['sig_ndy'],nze_hi), 1.0 ] ,
-        ]        
+        ]
+        
+        #function = self.likelihood_obj
+        #gradient = opt.drivers.FiniteDifference(function,step=1e-6)
+        #objective = Evaluator(function,gradient)
         
         problem.objectives = [
         #   [ function_handle     , 'output' ,  scl ] , 

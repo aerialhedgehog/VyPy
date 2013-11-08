@@ -15,6 +15,7 @@ class Problem(object):
         self.objectives   = []
         self.equalities   = []
         self.inequalities = []
+        
                 
     def compile(self):
         

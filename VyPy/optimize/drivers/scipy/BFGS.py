@@ -2,7 +2,7 @@
 from VyPy.optimize import Driver
 
 # ----------------------------------------------------------------------
-#   BFGS
+#   Broyden–Fletcher–Goldfarb–Shanno Algorithm
 # ----------------------------------------------------------------------
 class BFGS(Driver):
     def __init__(self,iprint=1,n_eval=100):
