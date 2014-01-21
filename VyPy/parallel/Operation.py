@@ -5,9 +5,14 @@
 
 class Operation(object):
     
-    def __init__(self, function, gate=None):
-        self.function = function
+    def __init__(self, function=None, gate=None):
+        self.function = function or self.function
         self.gate = gate or DummyGate()
+        if not hasattr(self.gate,'__enter__') and not hasattr(self.gate,'__exit__'):
+            raise AttributeError, 'gate must support context management'
+        
+    def function(self):
+        raise NotImplementedError
         
     def __call__(self, *arg, **kwarg):  
         """ makes object callable
@@ -23,7 +28,7 @@ class Operation(object):
             name = self.function.__name__
         else:
             name = repr(self.function)
-        return '<operation %s>' % name
+        return '<Operation %s>' % name
 
     # pickling
     #def __getstate__(self):

@@ -2,7 +2,7 @@
 
 import numpy as np
 import copy
-from VyPy.tools.IndexableBunch import IndexableBunch
+from VyPy.data import IndexableBunch
 
 
 class Training(object):

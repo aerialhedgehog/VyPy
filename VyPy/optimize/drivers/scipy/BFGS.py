@@ -1,8 +1,8 @@
 
-from VyPy.optimize import Driver
+from VyPy.optimize.drivers import Driver
 
 # ----------------------------------------------------------------------
-#   Broyden–Fletcher–Goldfarb–Shanno Algorithm
+#   Broyden-Fletcher-Goldfarb-Shanno Algorithm
 # ----------------------------------------------------------------------
 class BFGS(Driver):
     def __init__(self,iprint=1,n_eval=100):

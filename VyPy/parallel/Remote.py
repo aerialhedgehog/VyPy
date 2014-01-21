@@ -27,7 +27,7 @@ class Remote(object):
     def get(self,block=True,timeout=None):
         
         if self.outbox is None:
-            raise Exception, 'no outbox to query'
+            raise AttributeError, 'no outbox to query'
 
         task = self.outbox.get(block,timeout)
         
@@ -39,12 +39,16 @@ class Remote(object):
         # could get expensive with lots of __call__
         local_queue = self.local_queue
         
-        this_task = Task( inputs   = inputs ,
-                          function = function ,
-                          outbox   = local_queue )
+        if not isinstance(inputs,Task):
+            this_task = Task( inputs   = inputs ,
+                              function = function ,
+                              outbox   = local_queue )
+        else:
+            this_task = inputs
+            this_task.outbox = local_queue
         
         self.put(this_task)
-        
+
         task = local_queue.get(block=True)
         
         outputs = task.outputs

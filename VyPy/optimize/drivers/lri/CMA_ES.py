@@ -1,12 +1,9 @@
 
-from VyPy.optimize import Driver
+from VyPy.optimize.drivers import Driver
 import numpy
 
 try:
     import cma
-    is_loaded = True
-except ImportError:
-    from VyPy.plugins import cma
     is_loaded = True
 except ImportError:
     is_loaded = False
@@ -37,9 +34,9 @@ class CMA_ES(Driver):
         
         # inputs
         func   = self.func
-        x0     = problem.variables.scaled.initial
+        x0     = problem.variables.scaled.initials()
         sigma0 = self.sigma0()
-        bounds = problem.variables.scaled.bounds
+        bounds = problem.variables.scaled.bounds()
         bounds = map(list, zip(*bounds))
         
         # run the optimizer
@@ -56,7 +53,7 @@ class CMA_ES(Driver):
         x_min = result[0].tolist()
         f_min = result[1]
         
-        x_min = self.problem.variables.scaled.unpack(x_min)
+        x_min = self.problem.variables.scaled.pack(x_min)
         f_min = self.problem.objectives[0].evaluator.function(x_min)
         
         # done!
@@ -96,7 +93,7 @@ class CMA_ES(Driver):
         return result
     
     def sigma0(self):
-        bounds = self.problem.variables.scaled.bounds
+        bounds = self.problem.variables.scaled.bounds()
         sig0 = []
         for b in bounds:
             lo,hi = b

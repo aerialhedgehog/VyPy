@@ -1,49 +1,25 @@
 
-from Variables  import Variables
+from Variable   import Variable
 from Objective  import Objective
+from Constraint import Constraint
 from Equality   import Equality
 from Inequality import Inequality
+
+from VyPy.data import IndexableDict, Object
 
 # ----------------------------------------------------------------------
 #   Problem
 # ----------------------------------------------------------------------
-class Problem(object):
+class Problem(Object):
     
     def __init__(self):
         
-        self.variables    = []
-        self.objectives   = []
-        self.equalities   = []
-        self.inequalities = []
-        
-                
-    def compile(self):
-        
-        # sort objectives        
-        self.variables = Variables(self.variables)
-        var = self.variables
-        
-        # sort objectives
-        self.objectives = [ Objective(obj,var) for obj in self.objectives ]
-        
-        # sort constraints
-        for con in self.constraints:
-            _,(_,sgn,_),_ = con
-            # equality constraint
-            if sgn == '=':
-                con = Equality(con,var)
-                self.equalities.append(con)
-            # inequality constraint
-            elif sgn in '><':
-                con = Inequality(con,var)
-                self.inequalities.append(con)
-            # uhoh
-            else:
-                raise Exception, 'unrecognized sign %s' % sgn
-        #: for each constraint
-        
-        return
-    
+        self.variables    = Variable.Container()
+        self.objectives   = Objective.Container(self.variables)
+        self.constraints  = Constraint.Container(self.variables)
+        self.equalities   = self.constraints.equalities
+        self.inequalities = self.constraints.inequalities
+      
     def has_gradients(self):
         
         # objectives
@@ -60,3 +36,5 @@ class Problem(object):
            
         return obj_grads, ineq_grads, eq_grads
         
+
+

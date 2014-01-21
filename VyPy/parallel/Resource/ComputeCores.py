@@ -1,7 +1,7 @@
 
 from Resource import Resource
 from VyPy.parallel import Service
-from VyPy import ResourceException, ResourceWarning
+from VyPy.exceptions import ResourceException, ResourceWarning
 import sys
 
 class ComputeCores(Resource):

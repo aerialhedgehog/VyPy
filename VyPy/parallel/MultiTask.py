@@ -14,8 +14,9 @@ from Task      import Task
 from KillTask  import KillTask
 from ShareableQueue import ShareableQueue
 
-from VyPy import FailedTask
-from VyPy.tools import HashedDict
+from VyPy.exceptions import FailedTask
+from VyPy.data import HashedDict
+from VyPy.tools import redirect
 
 from VyPy.tools.arrays import numpy_isloaded, array_type, matrix_type
 
@@ -62,6 +63,14 @@ class MultiTask(object):
         
     
     def start(self):
+        if isinstance(self.verbose,str):
+            with redirect.output(self.verbose,self.verbose):
+                self.__start__()
+        else:
+            self.__start__()
+        
+    
+    def __start__(self):
         
         function = self.function
         name     = self.name
@@ -86,10 +95,7 @@ class MultiTask(object):
         self.nodes = nodes
         
     def __func__(self,inputs):
-        if not self.constants is None:
-            outputs = self.function(inputs,self.constants)
-        else:
-            outputs = self.function(inputs)
+        outputs = self.function(inputs)
         return outputs
         
     def __call__(self,x):
@@ -135,7 +141,7 @@ class MultiTask(object):
     def get(self):
         
         if self.outbox is None:
-            raise Exception, 'no outbox to query'
+            raise AttributeError, 'no outbox to query'
         
         # for sorting results
         results = HashedDict()
@@ -150,6 +156,9 @@ class MultiTask(object):
             results[x] = task
         
         return results
+    
+    def remote(self):
+        return Remote(self.inbox,self.outbox)
     
     def __del__(self):
         try:

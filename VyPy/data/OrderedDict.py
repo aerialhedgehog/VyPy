@@ -4,6 +4,9 @@
     {{{ http://code.activestate.com/recipes/576693/ (r9)
 """
 
+import re
+from Dict import Dict
+
 try:
     from thread import get_ident as _get_ident
 except ImportError:
@@ -15,7 +18,7 @@ except ImportError:
     pass
 
 
-class OrderedDict(dict):
+class OrderedDict(Dict):
     """Dictionary that remembers insertion order"""
     # An inherited dict maps keys to values.
     # The inherited dict provides __getitem__, __len__, __contains__, and get.
@@ -26,24 +29,32 @@ class OrderedDict(dict):
     # The circular doubly linked list starts and ends with a sentinel element.
     # The sentinel element never gets deleted (this simplifies the algorithm).
     # Each link is stored as a list of length three:  [PREV, NEXT, KEY].
+    
+    __root = None
+    __map  = None
+    
+    def __new__(klass,*args,**kwarg):
+
+        self = super(OrderedDict,klass).__new__(klass)
+        
+        if len(args) > 1:
+            raise TypeError('expected at most 1 arguments, got %d' % len(args))
+        if self.__root is None:
+            self.__root = root = [] # sentinel node
+            root[:] = [root, root, None]
+            self.__map = {}
+        
+        return self
 
     def __init__(self, *args, **kwds):
         '''Initialize an ordered dictionary.  Signature is the same as for
         regular dictionaries, but keyword arguments are not recommended
         because their insertion order is arbitrary.
-
         '''
-        if len(args) > 1:
-            raise TypeError('expected at most 1 arguments, got %d' % len(args))
-        try:
-            self.__root
-        except AttributeError:
-            self.__root = root = []                     # sentinel node
-            root[:] = [root, root, None]
-            self.__map = {}
         self.__update(*args, **kwds)
 
-    def __setitem__(self, key, value, dict_setitem=dict.__setitem__):
+
+    def __setitem__(self, key, value):
         'od.__setitem__(i, y) <==> od[i]=y'
         # Setting a new item creates a new link which goes at the end of the linked
         # list, and the inherited dictionary is updated with the new key/value pair.
@@ -51,13 +62,13 @@ class OrderedDict(dict):
             root = self.__root
             last = root[0]
             last[1] = root[0] = self.__map[key] = [last, root, key]
-        dict_setitem(self, key, value)
+        super(OrderedDict,self).__setitem__(key, value)
 
-    def __delitem__(self, key, dict_delitem=dict.__delitem__):
+    def __delitem__(self, key):
         'od.__delitem__(y) <==> del od[y]'
         # Deleting an existing item uses self.__map to find the link which is
         # then removed by updating the links in the predecessor and successor nodes.
-        dict_delitem(self, key)
+        super(OrderedDict,self).__delitem__(key)
         link_prev, link_next, key = self.__map.pop(key)
         link_prev[1] = link_next
         link_next[0] = link_prev
@@ -114,33 +125,40 @@ class OrderedDict(dict):
         return key, value
 
     # -- the following methods do not depend on the internal structure --
+    
+    # allow override of __iter__
+    __iter = __iter__
 
     def keys(self):
         'od.keys() -> list of keys in od'
-        return list(self)
-
+        return list(self.__iter())
+    
     def values(self):
         'od.values() -> list of values in od'
-        return [self[key] for key in self]
+        return [self[key] for key in self.__iter()]
 
     def items(self):
         'od.items() -> list of (key, value) pairs in od'
-        return [(key, self[key]) for key in self]
+        return [(key, self[key]) for key in self.__iter()]
 
     def iterkeys(self):
         'od.iterkeys() -> an iterator over the keys in od'
-        return iter(self)
+        return self.__iter()
 
     def itervalues(self):
         'od.itervalues -> an iterator over the values in od'
-        for k in self:
+        for k in self.__iter():
             yield self[k]
 
     def iteritems(self):
         'od.iteritems -> an iterator over the (key, value) items in od'
-        for k in self:
+        for k in self.__iter():
             yield (k, self[k])
-
+            
+    def append(self,key_wild,val):
+        key = self.next_key(key_wild)
+        self[key] = val
+    
     def update(*args, **kwds):
         '''od.update(E, **F) -> None.  Update od from dict/iterable E and F.
 
@@ -160,8 +178,8 @@ class OrderedDict(dict):
         other = ()
         if len(args) == 2:
             other = args[1]
-        if isinstance(other, dict):
-            for key in other:
+        if hasattr(other, 'iterkeys'):
+            for key in other.keys():
                 self[key] = other[key]
         elif hasattr(other, 'keys'):
             for key in other.keys():
@@ -195,6 +213,24 @@ class OrderedDict(dict):
             return self[key]
         self[key] = default
         return default
+    
+    def next_key(self,key_wild):
+        
+        if '%i' not in key_wild:
+            return key_wild
+        
+        ksplit = key_wild.split('%i')
+        
+        keys = [ int( k.lstrip(ksplit[0]).rstrip(ksplit[1]) ) for k in self.keys()]
+        
+        if keys:
+            key_index = max(keys)+1
+        else:
+            key_index = 0
+        
+        key = key_wild % (key_index)
+        
+        return key
 
     def __repr__(self, _repr_running={}):
         'od.__repr__() <==> repr(od)'
@@ -211,13 +247,11 @@ class OrderedDict(dict):
 
     def __reduce__(self):
         'Return state information for pickling'
-        items = [[k, self[k]] for k in self]
+        items = [[k, super(Dict,self).__getitem__(k) ] for k in self.__iter()]
         inst_dict = vars(self).copy()
         for k in vars(OrderedDict()):
             inst_dict.pop(k, None)
-        if inst_dict:
-            return (self.__class__, (items,), inst_dict)
-        return self.__class__, (items,)
+        return (_reconstructor, (self.__class__,items,), inst_dict)
 
     def copy(self):
         'od.copy() -> a shallow copy of od'
@@ -259,4 +293,59 @@ class OrderedDict(dict):
     def viewitems(self):
         "od.viewitems() -> a set-like object providing a view on od's items"
         return ItemsView(self)
+    
 ## end of http://code.activestate.com/recipes/576693/ }}}
+
+# for rebuilding disctionaries with attributes
+def _reconstructor(klass,items):
+    self = OrderedDict.__new__(klass)
+    OrderedDict.__init__(self,items)
+    return self
+
+
+if __name__ == '__main__':
+    
+    class TestDescriptor(object):
+        def __init__(self,x):
+            self.x = x
+        
+        def __get__(self,obj,kls=None):
+            print '__get__'
+            print type(obj), type(self)
+            print self.x
+            return self.x
+        
+        def __set__(self,obj,val):
+            print '__set__'
+            print type(obj), type(self)
+            print val
+            self.x = val
+        
+    class TestObject(OrderedDict):
+        pass
+        #def __init__(self,c):
+            #self.c = c
+    
+    o = TestObject()
+    o['x'] = TestDescriptor([1,2,3])
+    o['y'] = TestDescriptor([4,3,5])
+    for i in range(10):
+        o['x%i'%i] = 'yo'    
+    
+    print ''
+    print o
+    #print o.c
+    
+    print ''
+    o['x'] = [3,4,5]
+            
+    print ''
+    print 'pickle'
+    import pickle
+        
+    d = pickle.dumps(o)
+    p = pickle.loads(d)
+    
+    print ''
+    print p
+    #print p.c

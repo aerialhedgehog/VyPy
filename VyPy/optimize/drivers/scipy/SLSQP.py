@@ -1,5 +1,6 @@
 
-from VyPy.optimize import Driver
+from VyPy.optimize.drivers import Driver
+import numpy as np
 
 # ----------------------------------------------------------------------
 #   Sequential Least Squares Quadratic Programming
@@ -25,10 +26,10 @@ class SLSQP(Driver):
         
         # inputs
         func           = self.func
-        x0             = problem.variables.scaled.initial
+        x0             = problem.variables.scaled.initials()
         f_eqcons       = self.f_eqcons
         f_ieqcons      = self.f_ieqcons
-        bounds         = problem.variables.scaled.bounds
+        bounds         = problem.variables.scaled.bounds()
         fprime         = self.fprime
         fprime_ieqcons = self.fprime_ieqcons
         fprime_eqcons  = self.fprime_eqcons  
@@ -41,7 +42,7 @@ class SLSQP(Driver):
         if not deq  : fprime_eqcons  = None
         
         # run the optimizer
-        x_min = optimizer( 
+        x_min,f_min,its,imode,smode = optimizer( 
             func           = func           ,
             x0             = x0             ,
             f_eqcons       = f_eqcons       ,
@@ -51,13 +52,14 @@ class SLSQP(Driver):
             fprime_ieqcons = fprime_ieqcons ,
             fprime_eqcons  = fprime_eqcons  ,
             iprint         = iprint         ,
+            full_output    = True           ,
         )
         
-        x_min = self.problem.variables.scaled.unpack(x_min)
-        f_min = self.problem.objectives[0].evaluator.function(x_min)        
+        x_min = self.problem.variables.scaled.pack(x_min)
+        f_min = self.problem.objectives[0].evaluator.function(x_min)
         
         # done!
-        return f_min, x_min, None
+        return f_min, x_min, imode
     
     def func(self,x):
         objective = self.problem.objectives[0]
@@ -71,6 +73,8 @@ class SLSQP(Driver):
             res = inequality.function(x)
             res = -1 * res
             result.append(res)
+        if result:
+            result = np.hstack(result).T
         return result
     
     def f_eqcons(self,x):
@@ -79,11 +83,14 @@ class SLSQP(Driver):
         for equality in equalities:
             res = equality.function(x)
             result.append(res)
+        if result:
+            result = np.hstack(result).T
         return result
 
     def fprime(self,x):
         objective = self.problem.objectives[0]
         result = objective.gradient(x)
+        result = np.hstack(result).T
         return result
     
     def fprime_ieqcons(self,x):
@@ -93,6 +100,8 @@ class SLSQP(Driver):
             res = inequality.gradient(x)
             res = -1 * res
             result.append(res)
+        if result:
+            result = np.hstack(result).T
         return result
     
     def fprime_eqcons(self,x):
@@ -101,5 +110,6 @@ class SLSQP(Driver):
         for equality in equalities:
             res = equality.gradient(x)
             result.append(res)
+        if result:
+            result = np.hstack(result).T
         return result
-                         

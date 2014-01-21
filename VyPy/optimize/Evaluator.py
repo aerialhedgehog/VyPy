@@ -1,3 +1,9 @@
+
+# ----------------------------------------------------------------------
+#   Imports
+# ----------------------------------------------------------------------
+
+from VyPy.data import Object
         
 # ----------------------------------------------------------------------
 #   Evaluator
@@ -15,8 +21,11 @@ class Evaluator(object):
             base_method = getattr(Evaluator,meth)
             
             # method was not overriden, set to None
-            if this_method.__func__ is base_method.__func__:
-                setattr(self,meth,None)
+            try:
+                if this_method.__func__ is base_method.__func__:
+                    setattr(self,meth,None)
+            except AttributeError:
+                pass
             
     
     def function(self,variables):

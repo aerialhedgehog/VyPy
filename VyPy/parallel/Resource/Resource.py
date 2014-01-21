@@ -3,7 +3,7 @@
 #   Imports
 # ----------------------------------------------------------------------
 
-from VyPy import ResourceException, ResourceWarning
+from VyPy.exceptions import ResourceException, ResourceWarning
 from VyPy.parallel import KillTask, Remote, ShareableQueue, Service
 
 import multiprocessing as mp
@@ -32,7 +32,10 @@ class Resource(object):
         self.in_service  = None
         
     def start(self):
-        
+        if not isinstance(self.out_service,Service):
+            raise AttributeError , 'no out_service!'
+        if not isinstance(self.in_service,Service):
+            raise AttributeError , 'no in_service!'
         self.out_service.start()
         self.in_service.start()
         
@@ -83,26 +86,3 @@ class ResourceGate(object):
 
         
 
-                
-# ----------------------------------------------------------------------
-#   ElementService
-# ----------------------------------------------------------------------
-
-class ElementService(Service):
-    def __init__(self, inbox, function, elements, name='elementservice' ):
-        
-        Service.__init__(self, inbox=inbox, name=name)
-        
-        self.elements = elements
-        self.function = function
-        
-    def __func__(self,inputs,function):
-        
-        request  = inputs
-        elements = self.elements
-        
-        outputs = function(request,elements)
-        
-        return outputs
-        
-        

@@ -1,5 +1,5 @@
 
-from VyPy.tools import IndexableDict
+from VyPy.data import IndexableDict
 
     
 class Kernel(object):

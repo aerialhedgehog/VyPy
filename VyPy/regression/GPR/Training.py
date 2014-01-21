@@ -4,7 +4,8 @@ import sys, copy, weakref,gc
 import numpy as np
 import scipy as sp
 
-from VyPy.tools import IndexableBunch, check_array
+from VyPy.data import IndexableBunch
+from VyPy.tools import check_array
 
 def Training(XB,X,Y,DY=None):
     """ Class Factory for Training Data """

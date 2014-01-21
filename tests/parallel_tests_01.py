@@ -98,7 +98,7 @@ def test_all():
     #function = function.remote()
     #print function
     
-    print function(1.)
+    print function([1.,2.,3.])
     
 
 
@@ -113,3 +113,4 @@ def test_func(x):
 
 if __name__ == '__main__':
     main()
+    print 'done!'

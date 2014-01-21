@@ -2,13 +2,22 @@ import numpy as np
 import scipy as sp
 
 from Kernel import Kernel
-from VyPy.tools import check_array, vector_distance, IndexableBunch
+from VyPy.data import IndexableBunch
+from VyPy.tools import check_array, vector_distance
 
 class Gaussian(Kernel):
     ''' Gaussian Covariance Matrix with Derivatives 
         Hyp = sig_f,len_s,sig_ny,sig_ndy, all scalars
         probNze nominal noize for learning
     '''
+    
+    def __init__(self,Train,**hypers):
+        
+        super(Gaussian,self).__init__(Train,**hypers)
+        if hypers.has_key('probNze'):
+            self.Hypers['sig_ny']  = hypers['probNze']
+            self.Hypers['sig_ndy'] = hypers['probNze']
+        return 
     
     def default_hypers(self):
         

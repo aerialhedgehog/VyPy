@@ -89,10 +89,10 @@ def load_data( file_name,
 #  Save a Dictionary of Data
 # -------------------------------------------------------------------
 
-def save_data( file_name, data_dict, append=False ,
+def save_data( data_dict, file_name, append=False ,
                file_format = 'infer'              ,
                core_name='python_data'             ):
-    """ save_data( file_name, data_dict, append=False ,
+    """ save_data( data_dict, file_name, append=False ,
                    file_format = 'infer'              ,
                    core_name='python_data'             ):
             
@@ -337,7 +337,7 @@ def flatten_list(input_list):
     '''  
     output_list = []
     for value in input_list:
-        if isinstance(value,list):
+        if isinstance(value,(list,tuple)):
             output_list.extend( flatten_list(value) ) # telescope
         else:
             output_list.append(value)

@@ -1,5 +1,5 @@
 
-from VyPy.optimize import Driver
+from VyPy.optimize.drivers import Driver
 
 # ----------------------------------------------------------------------
 #   Constrained Optimization BY Linear Approximation
@@ -10,7 +10,7 @@ class COBYLA(Driver):
         import scipy.optimize        
         
         self.iprint = iprint
-        self.n_eval = n_eval
+        self.n_eval = int(n_eval)
         self.rho_scl = rho_scl
     
     def run(self,problem):
@@ -27,7 +27,7 @@ class COBYLA(Driver):
         
         # inputs
         func   = self.func
-        x0     = self.problem.variables.scaled.initial
+        x0     = self.problem.variables.scaled.initials()
         cons   = self.cons()
         rhobeg = self.rhobeg()
         rhoend = [ r*0.0001 for r in rhobeg ]
@@ -40,11 +40,12 @@ class COBYLA(Driver):
             rhobeg    = rhobeg ,
             rhoend    = rhoend ,
             iprint    = iprint ,
+            maxfun    = self.n_eval,
         )
         
         # nice: store result = fmin,xmin,iterations,time to problem history
 
-        x_min = self.problem.variables.scaled.unpack(x_min)
+        x_min = self.problem.variables.scaled.pack(x_min)
         f_min = self.problem.objectives[0].evaluator.function(x_min)        
         
         # done!
@@ -73,7 +74,7 @@ class COBYLA(Driver):
         return cons
     
     def rhobeg(self):
-        bounds = self.problem.variables.scaled.bounds
+        bounds = self.problem.variables.scaled.bounds()
         rho = []
         for b in bounds:
             lo,hi = b

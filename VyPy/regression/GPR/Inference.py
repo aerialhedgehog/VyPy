@@ -2,7 +2,8 @@
 import numpy as np
 import scipy as sp
 
-from VyPy import tools, EvaluationFailure
+from VyPy import tools
+from VyPy.exceptions import EvaluationFailure
 from VyPy.tools import check_array
 
 class Inference(object):

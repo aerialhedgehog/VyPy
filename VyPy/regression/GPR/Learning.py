@@ -4,7 +4,8 @@ import scipy as sp
 import scipy.linalg
 import copy
 
-from VyPy import optimize, tools, EvaluationFailure
+from VyPy import optimize, tools
+from VyPy.exceptions import EvaluationFailure
 
 class Learning(object):
     
@@ -54,8 +55,10 @@ class Learning(object):
         len_hi = np.log10(DX_max)+1.
         
         # noise ranges
-        nze_lo = max([ probNze-bndNze , -10.  ])
-        nze_hi = min([ probNze+bndNze , -0.01 ])
+        #nze_lo = max([ probNze-bndNze , -10.  ])
+        #nze_hi = max([ probNze+bndNze , -0.01 ])
+        nze_lo = probNze-bndNze
+        nze_hi = probNze+bndNze
         
         # some noise limits
         max_noise_ratio = -1.0
@@ -64,11 +67,11 @@ class Learning(object):
         
         # set variables and bound constraints
         problem.variables = [
-        #   ['Name'    , (lb    , x0              , ub   ), scl ] ,
-            ['sig_f'   , (sig_lo,Hypers['sig_f']  ,sig_hi), 1.0 ] ,
-            ['len_s'   , (len_lo,Hypers['len_s']  ,len_hi), 1.0 ] ,
-            ['sig_ny'  , (nze_lo,Hypers['sig_ny'] ,nze_hi), 1.0 ] ,
-            ['sig_ndy' , (nze_lo,Hypers['sig_ndy'],nze_hi), 1.0 ] ,
+        #   ['tag'     , x0               , (lb,ub)        , scl ] ,
+            ['sig_f'   , Hypers['sig_f']  , (sig_lo,sig_hi), 1.0 ] ,
+            ['len_s'   , Hypers['len_s']  , (len_lo,len_hi), 1.0 ] ,
+            ['sig_ny'  , Hypers['sig_ny'] , (nze_lo,nze_hi), 1.0 ] ,
+            ['sig_ndy' , Hypers['sig_ndy'], (nze_lo,nze_hi), 1.0 ] ,
         ]
         
         #function = self.likelihood_obj
@@ -201,7 +204,6 @@ class Learning(object):
         # setup the learning problem
         problem = optimize.Problem()
         self.setup(problem)
-        problem.compile()
         
         # Run Global Optimization
         print 'Global Optimization (CMA_ES)'
@@ -211,8 +213,8 @@ class Learning(object):
         [logP_min,Hyp_min,result] = driver.run(problem)
         
         # setup next problem
-        problem.variables.update_initial(Hyp_min)
-        problem.objectives[0].scale = -1.0e-2        
+        problem.variables.set(initials=Hyp_min)
+        problem.objectives['logP'].scale = -1.0e-2
         
         # Run Local Refinement
         print 'Local Optimization (SLSQP)'
