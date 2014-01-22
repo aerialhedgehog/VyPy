@@ -1,5 +1,5 @@
 """ gpr_fit_2d.py
-    A tutorial that uses functionality from the GPR module
+    An example that uses functionality from the GPR module
     to regress a 2-Dimensional Function
 """
 
