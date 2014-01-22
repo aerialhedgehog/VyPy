@@ -52,6 +52,6 @@ def lhc_uniform(XB,NI,XI=None,maxits=100):
         
     #: for iterate
     
-    print 'Minimum Distance = %.4g' % mindiff
+    print '  Minimum Distance = %.4g' % mindiff
     
     return XO

@@ -10,10 +10,6 @@ import pylab as plt
 import VyPy
 from VyPy.regression import gpr
 from VyPy.tools import check_array
-import VyPy.plugins.cma as cma
-
-import warnings
-warnings.simplefilter('error',RuntimeWarning)
 
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm

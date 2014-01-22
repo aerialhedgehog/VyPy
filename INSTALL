@@ -1,0 +1,155 @@
+# -----------------------------------------------------------
+#   VyPy Installation Guide
+# -----------------------------------------------------------
+
+# Package Requirements
+numpy      - http://sourceforge.net/projects/numpy/files/NumPy/1.8.0/
+  windows  - http://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy
+    
+scipy      - http://sourceforge.net/projects/scipy/files/scipy/0.13.2/
+  windows  - http://www.lfd.uci.edu/~gohlke/pythonlibs/#scipy
+    
+matplotlib - http://sourceforge.net/projects/matplotlib/files/matplotlib/matplotlib-1.3.1/
+  windows  - http://www.lfd.uci.edu/~gohlke/pythonlibs/#matplotlib
+    
+cma        - https://www.lri.fr/~hansen/cma.py (GPL'd)
+
+# Install Requirements
+setuptools - https://pypi.python.org/pypi/setuptools#id102  (download source)
+pip        - https://pypi.python.org/pypi/pip#downloads     (download source)
+
+Note: Setuptools and pip can be installed using the same 
+      installation instructions below.
+Note: Setuptools must be installed first, and pip second.
+
+
+# -----------------------------------------------------------
+#   Installation
+# -----------------------------------------------------------
+
+VyPy uses setuptools to install.
+
+1. Navigate to the trunk directory.
+   This should contain 'setup.py' and directory 'VyPy'.
+   setup.py is a script that will install the package.
+   
+2. Execute the install command.
+   There are two options for intalling. These commands may 
+   require a sudo ('super-user-do') call.
+   
+   A. Full-Install
+      This will build and copy the package to your installation 
+      directory.
+      
+      Command:
+      $ python setup.py install
+      
+   B. Developer-Install
+      This will place a link to the package in your installation 
+      directory.  It's a nice option if you expect to be modifying 
+      source.
+      
+      Command:
+      $ python setup.py develop
+
+3. Test installation
+   Navigate to a different directory, and try these commands:
+   
+   $ python
+   >>> import VyPy
+   >>> print VyPy.__file__
+   
+   This should print the location of the VyPy package.
+
+   
+# -----------------------------------------------------------
+#   Un-Installation
+# -----------------------------------------------------------
+
+VyPy uses pip to uninstall.
+
+1. Navigate to the trunk directory.
+
+2. Uninstallation varies with the type of your install
+   These commands may require a sudo ('super-user-do') call.
+   
+   A. Full-UnInstall
+      Use this if you performed a full-install.
+      
+      Command:
+      $ python setup.py uninstall
+  
+   B. Developer-UnInstall
+      Use this if you performed a developer-install.
+      
+      Command:
+      $ python setup.py develop --uninstall
+
+
+# -----------------------------------------------------------
+#   Additional Options
+# -----------------------------------------------------------
+
+Additional setup options, such as overriding the default install
+location, can be found with the following commands:
+
+python setup.py install --help
+python setup.py uninstall --help
+python setup.py develop --help
+python setup.py --help
+
+
+# -----------------------------------------------------------
+#   Alternate Install Locations
+# -----------------------------------------------------------
+
+If you don't have write-access to the python site-packages 
+directory, you can try these approaches to install VyPy
+
+
+# --- Install to local site-packages ---
+
+This involves the install option --user, and only works
+for full-installs.
+
+Command:
+    $ python setup.py install --user
+    
+# --- Start a local site-packages folder ---
+
+This inovles creating a local directory, and setting up your
+PYTHONPATH environment variable.
+
+1. Create a local directory.  
+   For example: mkdir ~/python-site-packages
+
+2. Append the path to PYTHONPATH
+
+   A. For Unix operating systems
+      i. Append this line to your ~/.bashrc file
+         export PYTHONPATH = $PYTHONPATH:~/python-site-packages
+      ii. And source the bashrc file
+         $ source ~/.bashrc
+         
+   B. For Windows operating systems
+      i. Open the start menu and type "environ", this opens the environment
+         variable editor
+      ii. Create or edit the PYTHONPATH environment variable, appending
+         your custom site-package directory
+
+3. Install VyPy
+
+   A. Full-Install
+      Command:
+         $ python setup.py install --prefix = ~/python-site-packages
+      
+   B. Developer-Install
+      Command:
+         $ python setup.py develop --prefix = ~/python-site-packages      
+
+
+
+
+
+
+

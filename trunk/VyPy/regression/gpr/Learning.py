@@ -20,6 +20,62 @@ class Learning(object):
         self.Train  = Infer.Kernel.Train
         
         return
+
+    def learn(self, hypers=None):
+        """ Learning.learn( hypers=None )
+            
+            learn useful hyperparameters for the training data
+        
+        """
+        
+        print 'Hyperparameter Learing ...'
+        
+        Infer  = self.Infer
+        Hypers = self.Hypers        
+        
+        if not hypers is None:
+            Hypers.update(hypers)
+              
+        # setup the learning problem
+        problem = optimize.Problem()
+        self.setup(problem)
+        
+        # Run Global Optimization
+        print '  Global Optimization (CMA_ES)'
+        driver = optimize.drivers.CMA_ES( rho_scl = 0.10  ,
+                                          n_eval  = 1000 ,
+                                          iprint  = 0     )
+        [logP_min,Hyp_min,result] = driver.run(problem)
+        
+        # setup next problem
+        problem.variables.set(initials=Hyp_min)
+        problem.objectives['logP'].scale = -1.0e-2
+        
+        # Run Local Refinement
+        print '  Local Optimization (SLSQP)'
+        driver = optimize.drivers.scipy.SLSQP( iprint = 0 )   
+        [logP_min,Hyp_min,result] = driver.run(problem)
+        
+        #print 'Local Optimization (COBYLA)'
+        #driver = opt.drivers.scipy.COBYLA()   
+        #[logP_min,Hyp_min,result] = driver.run(problem)        
+        
+        # report
+        print "  logP = " + str( logP_min )
+        print "  Hyp  = " + ', '.join(['%s: %.4f'%(k,v) for k,v in Hyp_min.items()])
+        
+        # store
+        Hyp_min = copy.deepcopy(Hyp_min)
+        Hypers.update(Hyp_min)
+        
+        try:
+            Infer.precalc()
+        except EvaluationFailure:
+            raise EvaluationFailure, 'learning failed, could not precalculate kernel'
+        
+        return
+    
+    #: def learn()
     
     def setup(self,problem):
         """ Kernel.setup(problem):
@@ -187,57 +243,3 @@ class Learning(object):
         return constraints
     
     #: def likelihood_cons()
-
-    def learn(self, hypers=None):
-        """ Learning.learn( hypers=None )
-            
-            learn useful hyperparameters for the training data
-        
-        """
-        
-        Infer  = self.Infer
-        Hypers = self.Hypers        
-        
-        if not hypers is None:
-            Hypers.update(hypers)
-              
-        # setup the learning problem
-        problem = optimize.Problem()
-        self.setup(problem)
-        
-        # Run Global Optimization
-        print 'Global Optimization (CMA_ES)'
-        driver = optimize.drivers.CMA_ES( rho_scl = 0.10  ,
-                                          n_eval  = 1000 ,
-                                          iprint  = 0     )
-        [logP_min,Hyp_min,result] = driver.run(problem)
-        
-        # setup next problem
-        problem.variables.set(initials=Hyp_min)
-        problem.objectives['logP'].scale = -1.0e-2
-        
-        # Run Local Refinement
-        print 'Local Optimization (SLSQP)'
-        driver = optimize.drivers.scipy.SLSQP( iprint = 0 )   
-        [logP_min,Hyp_min,result] = driver.run(problem)
-        
-        #print 'Local Optimization (COBYLA)'
-        #driver = opt.drivers.scipy.COBYLA()   
-        #[logP_min,Hyp_min,result] = driver.run(problem)        
-        
-        # report
-        print "logP = " + str( logP_min )
-        print "Hyp  = " + ', '.join(['%s: %.4f'%(k,v) for k,v in Hyp_min.items()])
-        
-        # store
-        Hyp_min = copy.deepcopy(Hyp_min)
-        Hypers.update(Hyp_min)
-        
-        try:
-            Infer.precalc()
-        except EvaluationFailure:
-            raise EvaluationFailure, 'learning failed, could not precalculate kernel'
-        
-        return
-    
-    #: def learn()

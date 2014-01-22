@@ -8,6 +8,9 @@ import numpy as np
 class SLSQP(Driver):
     def __init__(self,iprint=1):
         
+        from warnings import simplefilter
+        simplefilter('ignore',RuntimeWarning)
+        
         import scipy.optimize        
         
         self.iprint = iprint
