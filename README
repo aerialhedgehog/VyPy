@@ -8,7 +8,7 @@ This package contains modules useful for surrogate-based optimization.
 - Gaussian Process Regression Toolbox
     VyPy.regression.gpr
 
-- An Abstracted Optimizater Interface
+- An Abstracted Optimization Interface
     VyPy.optimize
     
 - Extended Dictionaries for Data
