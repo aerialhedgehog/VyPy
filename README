@@ -2,3 +2,21 @@ VyPy
 ====
 
 An Optimization Toolbox
+
+This package contains modules useful for surrogate-based optimization.
+
+- Gaussian Process Regression Toolbox
+    VyPy.regression.gpr
+
+- An Abstracted Optimizater Interface
+    VyPy.optimize
+    
+- Extended Dictionaries for Data
+    VyPy.data.IndexableBunch
+    
+- Parallelization Tools
+    VyPy.parallel (a work in progress)
+    
+Contributing Developers:
+    Trent Lukaczyk 
+    Robin Dofour 
