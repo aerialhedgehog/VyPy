@@ -7,7 +7,7 @@ import scipy.linalg
 
 from VyPy.exceptions import EvaluationFailure
 from VyPy.data import IndexableDict
-from VyPy.tools import vector_distance, check_array
+from VyPy.tools import vector_distance, atleast_2d
 
 class Modeling(object):
     
@@ -36,7 +36,7 @@ class Modeling(object):
     #: def __init__()
     
     @staticmethod
-    def Gaussian(XB,X,Y,DY=None,**hypers):
+    def Gaussian(XB,X,Y,DY=None,learn=True,**hypers):
         
         from VyPy.regression import gpr
         
@@ -50,7 +50,8 @@ class Modeling(object):
         Learn  = gpr.Learning(Infer)
         Model  = gpr.Modeling(Learn,Scaling)
         
-        Model.learn()
+        if learn:
+            Model.learn()
         
         return Model
     

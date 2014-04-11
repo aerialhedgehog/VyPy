@@ -33,9 +33,10 @@ class IndexableDict(OrderedDict):
         else:
             super(IndexableDict,self).__delitem__(k)
     
+    # iterate on values, not keys
     def __iter__(self):
         return super(IndexableDict,self).itervalues()
-  
+
     def index(self,key):
         if isinstance(key,int):
             index = range(len(self))[key]
@@ -49,6 +50,7 @@ class IndexableDict(OrderedDict):
             index can be an integer or key name
         """
         # potentially expensive....
+        # clears dictionary in process...
         
         # original length
         len_self = len(self)
@@ -77,6 +79,7 @@ class IndexableDict(OrderedDict):
             swap key locations 
         """
         # potentially expensive....
+        # clears dictionary in process...
         
         # get swapping indeces
         index1 = self.index(key1)
@@ -104,47 +107,73 @@ class IndexableDict(OrderedDict):
         
 if __name__ == '__main__':
     
-    class TestDescriptor(object):
-        def __init__(self,x):
-            self.x = x
-        
-        def __get__(self,obj,kls=None):
-            print '__get__'
-            print type(obj), type(self)
-            print self.x
-            return self.x
-        
-        def __set__(self,obj,val):
-            print '__set__'
-            print type(obj), type(self)
-            print val
-            self.x = val
-        
-    class TestObject(IndexableDict):
-        def __init__(self,c):
-            self.c = c
-    
-    o = TestObject(555)
-    o['x'] = TestDescriptor([1,2,3])
-    o['y'] = TestDescriptor([4,3,5])
-    
-    print ''
+    o = IndexableDict()
+    o['x'] = 'hello'
+    o['y'] = 1
+    o['z'] = [3,4,5]
+    o['t'] = IndexableDict()
+    o['t']['h'] = 20
+    o['t']['i'] = (1,2,3)
+
     print o
-    print o.c
-    
-    print ''
-    o['x'] = [3,4,5]
-    
-    print ''
-    print o[0]
-            
-            
+
     import pickle
-        
+
     d = pickle.dumps(o)
     p = pickle.loads(d)
     
     print ''
-    print p
-    print p[0]
-    print p.c
+    print p    
+    
+    o['t']['h'] = 'changed'
+    p.update(o)
+    p['t'].update(o)
+
+    print ''
+    print p[3]
+    
+    
+    #class TestDescriptor(object):
+        #def __init__(self,x):
+            #self.x = x
+        
+        #def __get__(self,obj,kls=None):
+            #print '__get__'
+            #print type(obj), type(self)
+            #print self.x
+            #return self.x
+        
+        #def __set__(self,obj,val):
+            #print '__set__'
+            #print type(obj), type(self)
+            #print val
+            #self.x = val
+        
+    #class TestObject(IndexableDict):
+        #def __init__(self,c):
+            #self.c = c
+    
+    #o = TestObject(555)
+    #o['x'] = TestDescriptor([1,2,3])
+    #o['y'] = TestDescriptor([4,3,5])
+    
+    #print ''
+    #print o
+    #print o.c
+    
+    #print ''
+    #o['x'] = [3,4,5]
+    
+    #print ''
+    #print o[0]
+            
+            
+    #import pickle
+        
+    #d = pickle.dumps(o)
+    #p = pickle.loads(d)
+    
+    #print ''
+    #print p
+    #print p[0]
+    #print p.c

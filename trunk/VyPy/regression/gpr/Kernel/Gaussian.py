@@ -3,7 +3,7 @@ import scipy as sp
 
 from Kernel import Kernel
 from VyPy.data import IndexableBunch
-from VyPy.tools import check_array, vector_distance
+from VyPy.tools import atleast_2d, vector_distance
 
 class Gaussian(Kernel):
     ''' Gaussian Covariance Matrix with Derivatives 
@@ -42,7 +42,7 @@ class Gaussian(Kernel):
         sig_ndy = 10**Hyp['sig_ndy']
                         
         # sizes
-        P = check_array(P); Q = check_array(Q)
+        P = atleast_2d(P); Q = atleast_2d(Q)
         n_p,n_d = P.shape
         n_q,_   = Q.shape
         

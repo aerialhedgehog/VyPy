@@ -95,7 +95,7 @@ interpolator = interpolate.pchip(x_guesses, l_guesses)
 
 def length_scaling(xs):
     
-    xs = VyPy.sbo.tools.check_array(xs)
+    xs = VyPy.sbo.tools.atleast_2d(xs)
     #ys = np.zeros([xs.shape[0],1])
     #for i,x in enumerate(xs):
         #ys[i] = interpolator(x)

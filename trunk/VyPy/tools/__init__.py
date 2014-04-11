@@ -1,7 +1,9 @@
 
 from arrays import (
     vector_distance, 
-    check_array, 
+    atleast_2d, 
+    atleast_2d_col, 
+    atleast_2d_row,
     check_list,
     array_type,
     matrix_type,

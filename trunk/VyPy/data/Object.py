@@ -7,6 +7,8 @@ class Object(object):
             return super(Object,self).__getattribute__(k).__get__(self,type(self))
         except AttributeError:
             return super(Object,self).__getattribute__(k)
+        except AttributeError:
+            raise AttributeError(k)        
     
     def __setattr__(self,k,v):
         try:
@@ -19,7 +21,8 @@ class Object(object):
             super(Object,self).__getattribute__(k).__del__(self)
         except AttributeError:
             super(Object,self).__delattr__(k)
-            
+        except AttributeError:
+            raise AttributeError(k)                    
             
 if __name__ == '__main__':
     

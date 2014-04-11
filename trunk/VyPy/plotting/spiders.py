@@ -7,12 +7,12 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 import matplotlib.pyplot as plt
 
-from VyPy.tools import check_array, vector_distance
+from VyPy.tools import atleast_2d, vector_distance
 
 def spider_axis(FIG,X0,XB):
 
-    X0 = check_array(X0,'row')
-    XB = check_array(XB,'row')
+    X0 = atleast_2d(X0,'row')
+    XB = atleast_2d(XB,'row')
     
     n_d = X0.shape[1]
     
@@ -58,8 +58,8 @@ def spider_trace(AX,FF,X0,XB,NP,*plt_args,**plt_kwarg):
         FF, centered at X0, in bounds XB, on plot axis AX
     '''
     
-    X0 = check_array(X0,'row')
-    XB = check_array(XB,'row')
+    X0 = atleast_2d(X0,'row')
+    XB = atleast_2d(XB,'row')
     
     n_d = X0.shape[1]
     n_x = NP

@@ -2,7 +2,7 @@
 from warnings import warn
 import numpy as np
 import scipy as sp
-from VyPy.tools import check_array
+from VyPy.tools import atleast_2d
 from VyPy.exceptions import Infeasible
 import VyPy.optimize as opt
 from VyPy.regression.active_subspace import project
@@ -15,9 +15,9 @@ cvxopt.solvers.options['show_progress'] = False
 def simple(basis_as,points_as,bounds_fs):
     
     # setup
-    V  = check_array(basis_as,'row')
-    Y  = check_array(points_as,'row')
-    XB = check_array(bounds_fs,'row')
+    V  = atleast_2d(basis_as,'row')
+    Y  = atleast_2d(points_as,'row')
+    XB = atleast_2d(bounds_fs,'row')
     
     X = np.dot(Y,V)
     
@@ -34,10 +34,10 @@ def simple(basis_as,points_as,bounds_fs):
 def bounded(points_as,basis_as,bounds_fs):
     
     # setup
-    V  = check_array(basis_as,'row')
-    Y  = check_array(points_as,'row')
+    V  = atleast_2d(basis_as,'row')
+    Y  = atleast_2d(points_as,'row')
     
-    XB = check_array(bounds_fs,'row')
+    XB = atleast_2d(bounds_fs,'row')
     dim_X = len(V[0])
     X  = []
     
@@ -90,10 +90,10 @@ def bounded(points_as,basis_as,bounds_fs):
 
 def constrained(points_as,basis_as,bounds_fs,basis_con):
     # setup
-    V  = check_array(basis_as,'row')
-    Y  = check_array(points_as,'row')
+    V  = atleast_2d(basis_as,'row')
+    Y  = atleast_2d(points_as,'row')
     
-    XB = check_array(bounds_fs,'row')
+    XB = atleast_2d(bounds_fs,'row')
     dim_X = len(V[0])
     X  = []
     
@@ -101,7 +101,7 @@ def constrained(points_as,basis_as,bounds_fs,basis_con):
     y_con = 0.00
     #y_con = -0.0016
     
-    V_con = check_array(basis_con,'row')
+    V_con = atleast_2d(basis_con,'row')
     
     # dummy objective weights
     f = cvxopt.matrix( [ 0.0 ] * dim_X )
@@ -191,8 +191,8 @@ class AS_Constraint(opt.Evaluator):
 #def inject_mean(basis_as, points_as, points_fs):
     
     ## setup
-    #basis_as = check_array(basis_as,'row')
-    #points_as = check_array(points_as,'col')
+    #basis_as = atleast_2d(basis_as,'row')
+    #points_as = atleast_2d(points_as,'col')
     
     #dim_fs = len(basis_as[0])
     #dim_rs = len(points_as[0])

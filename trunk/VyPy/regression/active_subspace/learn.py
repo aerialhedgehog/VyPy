@@ -3,13 +3,13 @@
 import numpy as np
 import scipy as sp
 
-from VyPy.tools import check_array
+from VyPy.tools import atleast_2d
 
 
 def linear(X,Y):
     
-    X = check_array(X)
-    Y = check_array(Y,oned_as='col')
+    X = atleast_2d(X)
+    Y = atleast_2d(Y,oned_as='col')
     
     #X,Y = scale_data(X,Y)
     
@@ -29,7 +29,7 @@ def linear(X,Y):
 
 def gradient(DY,k=None):
     
-    DY = check_array(DY)
+    DY = atleast_2d(DY)
     
     #X,Y,DY = scale_data(X,Y,DY)
     

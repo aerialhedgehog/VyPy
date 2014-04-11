@@ -19,6 +19,8 @@ class Learning(object):
         self.Hypers = Infer.Kernel.Hypers
         self.Train  = Infer.Kernel.Train
         
+        self.logP   = None
+        
         return
 
     def learn(self, hypers=None):
@@ -67,6 +69,7 @@ class Learning(object):
         # store
         Hyp_min = copy.deepcopy(Hyp_min)
         Hypers.update(Hyp_min)
+        self.logP = logP_min
         
         try:
             Infer.precalc()
@@ -105,6 +108,10 @@ class Learning(object):
         # feature and target ranges
         DX_min,DX_max,_ = tools.vector_distance(X);
         DY_min,DY_max,_ = tools.vector_distance(Y);
+        
+        if DX_min < 1e-10: DX_min = 1e-3;
+        if DY_min < 1e-10: DY_min = 1e-3;
+        
         sig_lo = np.log10(DY_min)-2.
         sig_hi = np.log10(DY_max)+2.
         len_lo = np.log10(DX_min)-2.

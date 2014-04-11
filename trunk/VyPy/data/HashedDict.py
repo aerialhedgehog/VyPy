@@ -35,7 +35,6 @@ class HashedDict(IndexableDict):
 if __name__ == '__main__':
     
     # tests
-    print 'Testing make_hash.py'
     cache = HashedDict()
     cache['a'] = 1
     cache[[1,2,3]] = 2
@@ -43,53 +42,16 @@ if __name__ == '__main__':
     print 'should be True:' , [1,2,3] in cache
     del cache[[1,2,3]]
     print 'should be False:' , cache.has_key([1,2,3])
-    
-        
-    class TestDescriptor(object):
-        def __init__(self,x):
-            self.x = x
-        
-        def __get__(self,obj,kls=None):
-            print '__get__'
-            print type(obj), type(self)
-            print self.x
-            return self.x
-        
-        def __set__(self,obj,val):
-            print '__set__'
-            print type(obj), type(self)
-            print val
-            self.x = val
-        
-    class TestObject(HashedDict):
-        def __init__(self,c):
-            self.c = c
-    
-    o = TestObject('456')
-    o['x'] = TestDescriptor([1,2,3])
-    o['y'] = TestDescriptor([4,3,5])
-    o.desc = TestDescriptor([5,7,8])
-    
-    print ''
-    print o
-    print o.desc
-    print o.c
-    
-    print ''
-    o['x'] = [3,4,5]
-    
-    print ''
-    print o[0]
+    cache[[1,2,5]] = 5
             
             
     import pickle
         
-    d = pickle.dumps(o)
+    d = pickle.dumps(cache)
     p = pickle.loads(d)
     
     print ''
     print p[1]
-    print p.c
-    print p.desc
+    print 'should be True:' , [1,2,5] in cache
     
     

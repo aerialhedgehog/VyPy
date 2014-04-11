@@ -42,7 +42,7 @@ def vector_distance(X,P=None):
         
     # distance vector to P
     else:
-        P = check_array(P,'row')
+        P = atleast_2d(P,'row')
         assert P.shape[0] == 1 , 'P must be a horizontal vector'
         D = np.array([ np.sqrt( np.sum( (X-P)**2 , 1 ) ) ]).T
         dmin = D.min()
@@ -55,17 +55,30 @@ def check_list(val):
     if not isinstance(val,list): val = [val]
     return val
 
-def check_array(A,oned_as='row'):
+
+def atleast_2d_col(A):
+    return atleast_2d(A,'col')
+
+def atleast_2d_row(A):
+    return atleast_2d(A,'row')
+
+def atleast_2d(A,oned_as='row'):
     ''' ensures A is an array and at least of rank 2
     '''
-    if not isinstance(A,np.ndarray):
+    
+    # not an array yet
+    if not isinstance(A,(array_type,matrix_type)):
+        if not isinstance(A,(list,tuple)):
+            A = [A]
         A = np.array(A)
+        
+    # check rank
     if np.rank(A) < 2:
-        A = np.array(np.matrix(A))
+        # expand row or col
         if oned_as == 'row':
-            pass
+            A = A[None,:]
         elif oned_as == 'col':
-            A = A.T
+            A = A[:,None]
         else:
             raise Exception , "oned_as must be 'row' or 'col' "
             

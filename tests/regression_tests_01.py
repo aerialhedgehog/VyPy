@@ -9,7 +9,7 @@ import pylab as plt
 
 import VyPy
 from VyPy.regression import gpr
-from VyPy.tools import check_array
+from VyPy.tools import atleast_2d
 
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
@@ -500,7 +500,7 @@ def fit_VFND():
 # -------------------------------------------------------------
 
 def Rosenbrock_Function(X):
-    X = check_array(X)
+    X = atleast_2d(X)
     D = X.shape[1]
     Y = 0.
     DY = X*0.
@@ -510,38 +510,38 @@ def Rosenbrock_Function(X):
             DY[:,I] = DY[:,I] - 400.*( X[:,I+1]-X[:,I]**2. ) * X[:,I] - 2.*( 1.-X[:,I] )
         if I>0:
             DY[:,I] = DY[:,I] + 200.*( X[:,I]-X[:,I-1]**2. )
-    Y = check_array(Y,'col')
+    Y = atleast_2d(Y,'col')
     return Y,DY
 
 def Rastrigin_Function(X):
-    X = check_array(X)
+    X = atleast_2d(X)
     scl = 1./2.5
     sgn = 1.0
     X = X * scl
     D = X.shape[1]
     Y  = sgn*( 10.*D + np.sum( X**2. - 10.*np.cos(2.*pi*X) , 1 ) );
     DY = sgn*( 2.*X + 20.*pi*np.sin(2.*pi*X) ) * scl;
-    Y = check_array(Y,'col')
+    Y = atleast_2d(Y,'col')
     return Y,DY
 
 def Parabolic_Function(X):
-    X = check_array(X)
+    X = atleast_2d(X)
     D = X.shape[1]
     C = np.ones([1,D])
     #C = np.array([ np.arange(D)+1. ])
     Y  = np.dot( X**2. , C.T  ) - 10.
     DY = 2.*X*C
-    Y = check_array(Y,'col')
+    Y = atleast_2d(Y,'col')
     return Y,DY
     
 def Hyperplane_Function(X):
-    X = check_array(X) + 0.5
+    X = atleast_2d(X) + 0.5
     N,D = X.shape
     C = np.array([ np.arange(D)+1. ])
     I = np.ones([N,D])
     Y  = np.dot( X , C.T  )
     DY = C * I
-    Y = check_array(Y,'col')
+    Y = atleast_2d(Y,'col')
     return Y,DY
 
 if __name__=='__main__':

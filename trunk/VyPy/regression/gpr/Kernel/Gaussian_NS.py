@@ -22,7 +22,7 @@ class Gaussian_NS(Gaussian):
         Len = self.Length
         
         # sizes
-        P = check_array(P); Q = check_array(Q)
+        P = atleast_2d(P); Q = atleast_2d(Q)
         n_p,n_d = P.shape
         n_q,_   = Q.shape
         
@@ -130,7 +130,7 @@ class Gaussian_NS(Gaussian):
         Len = self.Length
         
         # sizes
-        P = check_array(P); Q = check_array(Q)
+        P = atleast_2d(P); Q = atleast_2d(Q)
         n_p,n_d = P.shape
         n_q,_   = Q.shape
         

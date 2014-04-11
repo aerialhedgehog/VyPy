@@ -4,7 +4,7 @@ import scipy as sp
 
 from VyPy import tools
 from VyPy.exceptions import EvaluationFailure
-from VyPy.tools import check_array
+from VyPy.tools import atleast_2d
 
 class Inference(object):
     
@@ -55,7 +55,7 @@ class Inference(object):
         L      = self.L
         al     = self.al
         Yt     = self.Yt
-        XI     = check_array(XI)
+        XI     = atleast_2d(XI)
                 
         # covariance functions
         K3 = Kernel.K3(XI)

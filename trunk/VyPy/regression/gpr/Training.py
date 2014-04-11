@@ -5,7 +5,7 @@ import numpy as np
 import scipy as sp
 
 from VyPy.data import IndexableBunch
-from VyPy.tools import check_array
+from VyPy.tools import atleast_2d
 
 def Training(XB,X,Y,DY=None):
     """ Class Factory for Training Data """
@@ -13,9 +13,9 @@ def Training(XB,X,Y,DY=None):
     NewCls = TrainingBunch()
     
     # make sure all are 2D arrays
-    XB = check_array(XB)
-    X  = check_array(X)
-    Y  = check_array(Y,'col')
+    XB = atleast_2d(XB)
+    X  = atleast_2d(X)
+    Y  = atleast_2d(Y,'col')
     
     # sizes
     ntx ,nx  = X.shape
@@ -29,7 +29,7 @@ def Training(XB,X,Y,DY=None):
         DY = np.empty([0,nx])
         ntdy,ndy = DY.shape
     else:
-        DY = check_array(DY)
+        DY = atleast_2d(DY)
         ntdy,ndy = DY.shape
         assert ntx == ntdy  , 'different training data X and target gradients DY'
         

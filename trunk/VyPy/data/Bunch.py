@@ -20,13 +20,11 @@ class Bunch(Dict):
     """
     
     def __contains__(self, k):
-        """ 
-        """
         try:
             return hasattr(self, k) or dict.__contains__(self, k)
         except:
             return False
-    
+        
     # only called if k not found in normal places 
     def __getattr__(self, k):
         """ Gets key if it exists, otherwise throws AttributeError.
@@ -71,59 +69,71 @@ class Bunch(Dict):
                 raise AttributeError(k)
         else:
             super(Bunch,self).__delattr__(k)
-    
-    def __repr__(self):
-        """ Invertible* string-form of a Bunch.
-        """
-        keys = self.keys()
-        args = ', '.join(['%s=%r' % (key, self[key]) for key in keys])
-        return '%s(%s)' % (self.__class__.__name__, args)
-    
-    def __str__(self):
-        """ String-form of a OrderedBunch.
-        """
-        args = '\n'.join(['%s : %s' % (k,v) for k,v in self.iteritems()])
-        return args
-
+        
 
 if __name__ == '__main__':
     
-    class TestDescriptor(object):
-        def __init__(self,x):
-            self.x = x
-        
-        def __get__(self,obj,kls=None):
-            print '__get__'
-            print type(obj), type(self)
-            print self.x
-            return self.x
-        
-        def __set__(self,obj,val):
-            print '__set__'
-            print type(obj), type(self)
-            print val
-            self.x = val
-        
-    class TestObject(Bunch):
-        pass
+    o = Bunch()
+    o['x'] = 'hello'
+    o.y = 1
+    o['z'] = [3,4,5]
+    o.t = Bunch()
+    o.t['h'] = 20
+    o.t.i = (1,2,3)
     
-    o = TestObject()
-    o['x'] = TestDescriptor([1,2,3])
-    o['y'] = 1
-    
-    print ''
-    print o['x']
-    print o.y
-    
-    print ''
-    o['x'] = [3,4,5]
-            
-            
+    print o
+
     import pickle
-        
+
     d = pickle.dumps(o)
     p = pickle.loads(d)
     
     print ''
-    print p['x']
-    print p.y
+    print p    
+    
+    o.t['h'] = 'changed'
+    p.update(o)
+
+    print ''
+    print p
+    
+    #class TestDescriptor(object):
+        #def __init__(self,x):
+            #self.x = x
+        
+        #def __get__(self,obj,kls=None):
+            #print '__get__'
+            #print type(obj), type(self)
+            #print self.x
+            #return self.x
+        
+        #def __set__(self,obj,val):
+            #print '__set__'
+            #print type(obj), type(self)
+            #print val
+            #self.x = val
+        
+    #class TestObject(Bunch):
+        #pass
+    
+    #o = TestObject()
+    #o['x'] = TestDescriptor([1,2,3])
+    #o['y'] = 1
+    
+    #print ''
+    #print o['x']
+    #print o.y
+    #print o
+    
+    #print ''
+    #o['x'] = [3,4,5]
+            
+            
+    #import pickle
+        
+    #d = pickle.dumps(o)
+    #p = pickle.loads(d)
+    
+    #print ''
+    #print p['x']
+    #print p.y

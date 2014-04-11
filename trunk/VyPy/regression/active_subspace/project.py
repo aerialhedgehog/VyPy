@@ -3,13 +3,13 @@
 
 from warnings import warn
 import numpy as np
-from VyPy.tools import check_array
+from VyPy.tools import atleast_2d
 
 
 def simple(points_fs,basis_as):
     
-    X = check_array(points_fs,'row')
-    V = check_array(basis_as,'row')
+    X = atleast_2d(points_fs,'row')
+    V = atleast_2d(basis_as,'row')
     
     Y = np.dot(V,X.T).T
     
