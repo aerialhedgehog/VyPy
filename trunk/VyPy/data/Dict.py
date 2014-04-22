@@ -34,12 +34,17 @@ class Dict(dict):
             raise TypeError , 'input is not a dictionary type'
         for k,v in other.iteritems():
             # recurse only if self's value is a Dict()
+            if k.startswith('_'):
+                continue
             try:
                 self[k].update(v)
             except:
                 self[k] = v
         return
     
+    def append(self,key_wild,val):
+        key = self.next_key(key_wild)
+        self[key] = val
     
     # new keys by wild card integer
     def next_key(self,key_wild):
@@ -65,7 +70,7 @@ class Dict(dict):
         """ Invertible* string-form of a Bunch.
         """
         keys = self.keys()
-        args = ', '.join(['%s=%r' % (key, self[key]) for key in keys])
+        args = ', '.join(['%s=%r' % (key, self[key]) for key in keys if not key.startswith('_')])
         return '%s(%s)' % (self.__class__.__name__, args)
 
     def __str__(self,indent=''):
@@ -80,6 +85,9 @@ class Dict(dict):
 
         # print values   
         for key,value in self.iteritems():
+            if key.startswith('_'):
+                continue
+            
             if isinstance(value,Dict):
                 if not value:
                     val = '\n'
@@ -97,8 +105,6 @@ class Dict(dict):
         return args
 
 
-
-
 if __name__ == '__main__':
 
     o = Dict()
@@ -108,16 +114,16 @@ if __name__ == '__main__':
     o['t'] = Dict()
     o['t']['h'] = 20
     o['t']['i'] = (1,2,3)
-
+    
     print o
-
+    
     import pickle
-
+    
     d = pickle.dumps(o)
     p = pickle.loads(d)
     
     print ''
-    print p    
+    print p
     
     o['t']['h'] = 'changed'
     p.update(o)

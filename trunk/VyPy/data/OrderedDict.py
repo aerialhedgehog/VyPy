@@ -176,10 +176,6 @@ class OrderedDict(Dict):
         'od.iteritems -> an iterator over the (key, value) items in od'
         for k in self.__iter():
             yield (k, self[k])
-            
-    def append(self,key_wild,val):
-        key = self.next_key(key_wild)
-        self[key] = val
 
     __marker = object()
 
