@@ -1,9 +1,17 @@
 
+# ----------------------------------------------------------------------
+#   Imports
+# ----------------------------------------------------------------------
+
 import copy
 DictProxyType = type(object.__dict__)
 
 from VyPy.tools import numpy_isloaded, array_type, matrix_type
 
+
+# ----------------------------------------------------------------------
+#   Method
+# ----------------------------------------------------------------------
 
 def make_hashable(o):
     """ Makes a hashable item from a dictionary, list, tuple or set to any level, that 

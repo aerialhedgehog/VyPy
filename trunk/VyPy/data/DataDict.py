@@ -1,23 +1,27 @@
 
 # ----------------------------------------------------------------------
-#  Imports
+#   Imports
 # ----------------------------------------------------------------------
 
 from IndexableBunch import IndexableBunch
+from OrderedBunch import OrderedBunch
 
 import types
 from copy            import deepcopy
 from warnings        import warn
 
+import numpy as np
+from VyPy.tools.arrays import atleast_2d_col, array_type, matrix_type
+
 
 # ----------------------------------------------------------------------
-#  DataDict
+#   Data Dictionary
 # ----------------------------------------------------------------------
 
 class DataDict(IndexableBunch):
     """ DataDict()
         
-        a dict-type container with attribute, item and index style access
+        a dict-type container with attribute and item style access
         initializes with default attributes
         will recursively search for defaults of base classes
         current class defaults overide base class defaults
@@ -28,7 +32,7 @@ class DataDict(IndexableBunch):
     """
     
     def __defaults__(self):
-        pass    
+        pass
     
     def __new__(cls,*args,**kwarg):
         """ supress use of args or kwarg for defaulting
@@ -70,14 +74,7 @@ class DataDict(IndexableBunch):
         """ 
         """
         pass
-    
-    
-    def __setitem__(self,k,v):
-        # attach all functions as static methods
-        if isinstance(v,types.FunctionType):
-            v = staticmethod(v)
-        IndexableBunch.__setitem__(self,k,v)
-        
+            
     def __str__(self,indent=''):
         new_indent = '  '
         args = ''
@@ -94,6 +91,11 @@ class DataDict(IndexableBunch):
         
     def __repr__(self):
         return self.__str__()
+    
+    def append(self,value,key=None):
+        if key is None: key = value.tag
+        if key in self: raise KeyError, 'key "%s" already exists' % key
+        self[key] = value    
     
     def find_instances(self,data_type):
         """ DataDict.find_instances(data_type)
@@ -145,7 +147,6 @@ class DataDict(IndexableBunch):
 #   Module Tests
 # ----------------------------------------------------------------------        
 
-    
 if __name__ == '__main__':
     
 
@@ -157,7 +158,15 @@ if __name__ == '__main__':
     d.options.half  = 0.5
     print d
     
-    import numpy as np
+    # speed test
+    from time import time, sleep
+    t0 = time()
+    for i in range(100000):
+        v = d.options.field
+    print '%.6f' % (time()-t0)    
+    
+
+    
     ones = np.ones([10,1])
         
     m = DataDict()

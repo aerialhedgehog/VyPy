@@ -1,12 +1,25 @@
 
-from Bunch import Bunch
+# ----------------------------------------------------------------------
+#   Imports
+# ----------------------------------------------------------------------
+
+from OrderedBunch import OrderedBunch
 from IndexableDict import IndexableDict
 
-class IndexableBunch(IndexableDict,Bunch):
+
+# ----------------------------------------------------------------------
+#   Indexable Bunch
+# ----------------------------------------------------------------------
+
+class IndexableBunch(IndexableDict,OrderedBunch):
     """ An ordered indexable dictionary that provides attribute-style access.
     """
     pass
+    # ballin
 
+# ----------------------------------------------------------------------
+#   Module Tests
+# ----------------------------------------------------------------------
 
 if __name__ == '__main__':
     
@@ -28,55 +41,10 @@ if __name__ == '__main__':
     print ''
     print p    
     
-    o.t['h'] = 'changed'
+    o.t[0] = 'changed'
     p.update(o)
-    p.t.update(o)
 
     print ''
-    print p[3]
+    print p
+    print p[0]
     
-    #class TestDescriptor(object):
-        #def __init__(self,x):
-            #self.x = x
-        
-        #def __get__(self,obj,kls=None):
-            #print '__get__'
-            #print type(obj), type(self)
-            #print self.x
-            #return self.x
-        
-        #def __set__(self,obj,val):
-            #print '__set__'
-            #print type(obj), type(self)
-            #print val
-            #self.x = val
-        
-    #class TestObject(IndexableBunch):
-        #def __init__(self,c):
-            #self.c = c
-    
-    #o = TestObject([1,2,3.5,7])
-    #o['x'] = TestDescriptor([1,2,3])
-    #o.y = 1
-    #for i in range(10):
-        #o['x%i'%i] = 'yo'
-    
-    #print ''
-    #print o['x']
-    #print o.y
-    #print o.c
-    
-    #print ''
-    #o['x'] = [3,4,5]
-            
-            
-    #import pickle
-        
-    #d = pickle.dumps(o)
-    #p = pickle.loads(d)
-    
-    #print ''
-    #print p['x']
-    #print p[1]
-    #print p
-    #print p.c

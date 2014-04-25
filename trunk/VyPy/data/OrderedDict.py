@@ -1,8 +1,7 @@
 
-""" Backport of OrderedDict() class that runs on Python 2.4, 2.5, 2.6, 2.7 and pypy.
-    Passes Python2.7's test suite and incorporates all the latest updates.
-    {{{ http://code.activestate.com/recipes/576693/ (r9)
-"""
+# ----------------------------------------------------------------------
+#   Imports
+# ----------------------------------------------------------------------
 
 import re
 from Dict import Dict
@@ -18,10 +17,14 @@ except ImportError:
     pass
 
 
+# ----------------------------------------------------------------------
+#   Ordered Dictionary
+# ----------------------------------------------------------------------
+
 class OrderedDict(Dict):
     """Dictionary that remembers insertion order"""
-    # An inherited dict maps keys to values.
-    # The inherited dict provides __getitem__, __len__, __contains__, and get.
+    # The inherited Dict maps keys to values.
+    # The inherited Dict provides __getitem__, __len__, __contains__, and get.
     # The remaining methods are order-aware.
     # Big-O running times for all methods are the same as for regular dictionaries.
 
@@ -40,16 +43,17 @@ class OrderedDict(Dict):
         if len(args) > 1:
             raise TypeError('expected at most 1 arguments, got %d' % len(args))
         if self.__root is None:
-            self.__root = root = [] # sentinel node
+            root = [] # sentinel node
             root[:] = [root, root, None]
+            self.__root = root
             self.__map = {}
         
         return self
 
     def __init__(self, items=None, **kwds):
         '''Initialize an ordered dictionary.  Signature is the same as for
-        regular dictionaries, but keyword arguments are not recommended
-        because their insertion order is arbitrary.
+           regular dictionaries, but keyword arguments are not recommended
+           because their insertion order is arbitrary.
         '''
         
         # od.update(E, **F) -> None.  Update od from dict/iterable E and F.
@@ -77,7 +81,7 @@ class OrderedDict(Dict):
 
 
     def __setitem__(self, key, value):
-        'od.__setitem__(i, y) <==> od[i]=y'
+        """od.__setitem__(i, y) <==> od[i]=y"""
         # Setting a new item creates a new link which goes at the end of the linked
         # list, and the inherited dictionary is updated with the new key/value pair.
         if key not in self:
@@ -87,7 +91,7 @@ class OrderedDict(Dict):
         super(OrderedDict,self).__setitem__(key, value)
 
     def __delitem__(self, key):
-        'od.__delitem__(y) <==> del od[y]'
+        """od.__delitem__(y) <==> del od[y]"""
         # Deleting an existing item uses self.__map to find the link which is
         # then removed by updating the links in the predecessor and successor nodes.
         super(OrderedDict,self).__delitem__(key)
@@ -96,7 +100,7 @@ class OrderedDict(Dict):
         link_next[0] = link_prev
 
     def __iter__(self):
-        'od.__iter__() <==> iter(od)'
+        """od.__iter__() <==> iter(od)"""
         root = self.__root
         curr = root[1]
         while curr is not root:
@@ -104,7 +108,7 @@ class OrderedDict(Dict):
             curr = curr[1]
 
     def __reversed__(self):
-        'od.__reversed__() <==> reversed(od)'
+        """od.__reversed__() <==> reversed(od)"""
         root = self.__root
         curr = root[0]
         while curr is not root:
@@ -112,7 +116,7 @@ class OrderedDict(Dict):
             curr = curr[0]
 
     def clear(self):
-        'od.clear() -> None.  Remove all items from od.'
+        """od.clear() -> None.  Remove all items from od."""
         try:
             for node in self.__map.itervalues():
                 del node[:]
@@ -121,12 +125,11 @@ class OrderedDict(Dict):
             self.__map.clear()
         except AttributeError:
             pass
-        dict.clear(self)
+        super(OrderedDict,self).clear()
 
     def popitem(self, last=True):
         '''od.popitem() -> (k, v), return and remove a (key, value) pair.
-        Pairs are returned in LIFO order if last is true or FIFO order if false.
-
+           Pairs are returned in LIFO order if last is true or FIFO order if false.
         '''
         if not self:
             raise KeyError('dictionary is empty')
@@ -143,46 +146,16 @@ class OrderedDict(Dict):
             link_next[0] = root
         key = link[2]
         del self.__map[key]
-        value = dict.pop(self, key)
+        value = super(OrderedDict,self).pop(key)
         return key, value
 
     # -- the following methods do not depend on the internal structure --
     
-    # allow override of __iter__
-    __iter = __iter__
-
-    def keys(self):
-        'od.keys() -> list of keys in od'
-        return list(self.__iter())
-    
-    def values(self):
-        'od.values() -> list of values in od'
-        return [self[key] for key in self.__iter()]
-
-    def items(self):
-        'od.items() -> list of (key, value) pairs in od'
-        return [(key, self[key]) for key in self.__iter()]
-
-    def iterkeys(self):
-        'od.iterkeys() -> an iterator over the keys in od'
-        return self.__iter()
-
-    def itervalues(self):
-        'od.itervalues -> an iterator over the values in od'
-        for k in self.__iter():
-            yield self[k]
-
-    def iteritems(self):
-        'od.iteritems -> an iterator over the (key, value) items in od'
-        for k in self.__iter():
-            yield (k, self[k])
-
     __marker = object()
 
     def pop(self, key, default=__marker):
         '''od.pop(k[,d]) -> v, remove specified key and return the corresponding value.
-        If key is not found, d is returned if given, otherwise KeyError is raised.
-
+           If key is not found, d is returned if given, otherwise KeyError is raised.
         '''
         if key in self:
             result = self[key]
@@ -193,14 +166,14 @@ class OrderedDict(Dict):
         return default
 
     def setdefault(self, key, default=None):
-        'od.setdefault(k[,d]) -> od.get(k,d), also set od[k]=d if k not in od'
+        """od.setdefault(k[,d]) -> od.get(k,d), also set od[k]=d if k not in od"""
         if key in self:
             return self[key]
         self[key] = default
         return default
 
     def __repr__(self, _repr_running={}):
-        'od.__repr__() <==> repr(od)'
+        """od.__repr__() <==> repr(od)"""
         call_key = id(self), _get_ident()
         if call_key in _repr_running:
             return '...'
@@ -213,15 +186,15 @@ class OrderedDict(Dict):
             del _repr_running[call_key]
 
     def __reduce__(self):
-        'Return state information for pickling'
-        items = [( k, super(Dict,self).__getitem__(k) ) for k in self.__iter()]
+        """Return state information for pickling"""
+        items = [( k, OrderedDict.__getitem__(self,k) ) for k in OrderedDict.iterkeys(self)]
         inst_dict = vars(self).copy()
         for k in vars(OrderedDict()):
             inst_dict.pop(k, None)
         return (_reconstructor, (self.__class__,items,), inst_dict)
 
     def copy(self):
-        'od.copy() -> a shallow copy of od'
+        """od.copy() -> a shallow copy of od"""
         return self.__class__(self)
 
     @classmethod
@@ -249,16 +222,45 @@ class OrderedDict(Dict):
 
     # -- the following methods are only used in Python 2.7 --
 
+    # allow override of iterators
+    __iter = __iter__
+    
+    def keys(self):
+        """OrderedDict.keys() -> list of keys in the dictionary"""
+        return list(self.__iter())
+    
+    def values(self):
+        """OrderedDict.values() -> list of values in the dictionary"""
+        return [self[key] for key in self.__iter()]
+    
+    def items(self):
+        """OrderedDict.items() -> list of (key, value) pairs in the dictionary"""
+        return [(key, self[key]) for key in self.__iter()]
+    
+    def iterkeys(self):
+        """OrderedDict.iterkeys() -> an iterator over the keys in the dictionary"""
+        return self.__iter()
+    
+    def itervalues(self):
+        """OrderedDict.itervalues -> an iterator over the values in the dictionary"""
+        for k in self.__iter():
+            yield self[k]
+    
+    def iteritems(self):
+        """od.iteritems -> an iterator over the (key, value) items in the dictionary"""
+        for k in self.__iter():
+            yield (k, self[k])    
+
     def viewkeys(self):
-        "od.viewkeys() -> a set-like object providing a view on od's keys"
+        """od.viewkeys() -> a set-like object providing a view on od's keys"""
         return KeysView(self)
 
     def viewvalues(self):
-        "od.viewvalues() -> an object providing a view on od's values"
+        """od.viewvalues() -> an object providing a view on od's values"""
         return ValuesView(self)
 
     def viewitems(self):
-        "od.viewitems() -> a set-like object providing a view on od's items"
+        """od.viewitems() -> a set-like object providing a view on od's items"""
         return ItemsView(self)
     
 
@@ -280,7 +282,7 @@ class OrderedDict(Dict):
         
         """
         
-        # dont require data to have numpy
+        # dont require dict to have numpy
         import numpy as np
         from VyPy.tools.arrays import atleast_2d_col, array_type, matrix_type
         
@@ -332,6 +334,7 @@ class OrderedDict(Dict):
         if M:
             M = np.hstack(M)
         else:
+            # empty result
             if vector:
                 M = np.array([])
             else:
@@ -356,7 +359,7 @@ class OrderedDict(Dict):
                  
         """
         
-        # dont require data to have numpy
+        # dont require dict to have numpy
         import numpy as np
         from VyPy.tools.arrays import atleast_2d_col, array_type, matrix_type
         
@@ -444,8 +447,14 @@ def _reconstructor(klass,items):
     return self
 
 
+
+# ----------------------------------------------------------------------
+#   Module Tests
+# ----------------------------------------------------------------------
+
 if __name__ == '__main__':
     
+    # pack it up
     o = OrderedDict()
     o['x'] = 'hello'
     o['y'] = 1
@@ -454,8 +463,10 @@ if __name__ == '__main__':
     o['t']['h'] = 20
     o['t']['i'] = (1,2,3)
 
+    # printing
     print o
 
+    # pickling
     import pickle
 
     d = pickle.dumps(o)
@@ -464,13 +475,19 @@ if __name__ == '__main__':
     print ''
     print p    
     
+    # recursive updates
     o['t']['h'] = 'changed'
     p.update(o)
-    p['t'].update(o)
 
     print ''
     print p
     
+    
+    
+# ----------------------------------------------------------------------
+#   Gravetart
+# ----------------------------------------------------------------------
+
     #class TestDescriptor(object):
         #def __init__(self,x):
             #self.x = x

@@ -1,6 +1,14 @@
 
+# ----------------------------------------------------------------------
+#   Imports
+# ----------------------------------------------------------------------
 
 from OrderedDict import OrderedDict
+
+
+# ----------------------------------------------------------------------
+#   Indexable Dictionary
+# ----------------------------------------------------------------------
 
 class IndexableDict(OrderedDict):
     """ An OrderedDict with list-style access 
@@ -103,7 +111,9 @@ class IndexableDict(OrderedDict):
         for i in indeces: self[keys[i]] = values[i]     
         
         
-        
+# ----------------------------------------------------------------------
+#   Module Tests
+# ----------------------------------------------------------------------        
         
 if __name__ == '__main__':
     
@@ -125,55 +135,9 @@ if __name__ == '__main__':
     print ''
     print p    
     
-    o['t']['h'] = 'changed'
+    o[3][0] = 'changed'
     p.update(o)
-    p['t'].update(o)
 
     print ''
-    print p[3]
+    print p
     
-    
-    #class TestDescriptor(object):
-        #def __init__(self,x):
-            #self.x = x
-        
-        #def __get__(self,obj,kls=None):
-            #print '__get__'
-            #print type(obj), type(self)
-            #print self.x
-            #return self.x
-        
-        #def __set__(self,obj,val):
-            #print '__set__'
-            #print type(obj), type(self)
-            #print val
-            #self.x = val
-        
-    #class TestObject(IndexableDict):
-        #def __init__(self,c):
-            #self.c = c
-    
-    #o = TestObject(555)
-    #o['x'] = TestDescriptor([1,2,3])
-    #o['y'] = TestDescriptor([4,3,5])
-    
-    #print ''
-    #print o
-    #print o.c
-    
-    #print ''
-    #o['x'] = [3,4,5]
-    
-    #print ''
-    #print o[0]
-            
-            
-    #import pickle
-        
-    #d = pickle.dumps(o)
-    #p = pickle.loads(d)
-    
-    #print ''
-    #print p
-    #print p[0]
-    #print p.c

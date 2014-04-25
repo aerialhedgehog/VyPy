@@ -1,60 +1,35 @@
 #!/usr/bin/env python
 
-""" Bunch is a subclass of dict with attribute-style access.
-    
-    It is safe to import * from this module:
-    
-        __all__ = ('Bunch', 'bunchify','unbunchify')
-    
-    un/bunchify provide dictionary conversion; Bunches can also be
-    converted via Bunch.to/fromDict().
-    
-    original source:
-    https://pypi.python.org/pypi/bunch
-"""
+# ----------------------------------------------------------------------
+#   Imports
+# ----------------------------------------------------------------------
 
 from Dict import Dict
 
+
+# ----------------------------------------------------------------------
+#   Bunch 
+# ----------------------------------------------------------------------
+
 class Bunch(Dict):
     """ A dictionary that provides attribute-style access.
+        This implementation does not extend __getattribute__ to maintain
+        performance.
+        
     """
     
-    #def __new__(self,*args,**kwarg):
-        #self = Dict.__new__(self,*args,**kwarg)
-        #setattr(self,'_descriptors',{})
-        #return self
+    __getitem__ = Dict.__getattribute__
+    __setitem__ = Dict.__setattr__
+    __delitem__ = Dict.__delattr__
     
-    #def __getattribute__(self,k):
-        #v = Dict.__getattribute__(self,k)
-        #if hasattr(v,'__get__'):
-            #return v.__get__(self,type(self))
-        #else:
-            #return v 
-            
+    #def __getitem__(self,k):
+        #return self.__getattribute__(k)
+    
     #def __setitem__(self,k,v):
-        #try:
-            #super(Dict,self).__getitem__(k).__set__(self,v)
-        #except AttributeError:
-            #super(Dict,self).__setitem__(k,v)
-        #except KeyError:
-            #raise KeyError(k)
-
+        #self.__setattr__(k,v)
+    
     #def __delitem__(self,k):
-        #try:
-            #super(Dict,self).__getitem__(k).__del__(self)
-        #except AttributeError:
-            #super(Dict,self).__delitem__(k)
-        #except KeyError:
-            #raise KeyError(k)
-    
-    def __getitem__(self,k):
-        return self.__getattribute__(k)
-    
-    def __setitem__(self,k,v):
-        self.__setattr__(k,v)
-    
-    def __delitem__(self,k):
-        self.__delattr__(k)
+        #self.__delattr__(k)
         
     def clear(self):
         self.__dict__.clear()
@@ -144,44 +119,14 @@ class Bunch(Dict):
     def __ne__(self,other):
         return self.__dict__.__ne__(other)
     
-    #_descriptors = None
-    #def add_descriptor(self,k,v):
-        ##cls = type(self)
-        ##if not hasattr(cls,'__instance_copy'):
-            ##cls = type(cls.__name__, (cls,), {})
-            ##setattr( cls , '__instance_copy',True)
-            ##self.__class__ = cls
-        
-        #desc = DescriptorProxy(k)
-        #self._descriptors[k] = v
-        #setattr( self.__class__ , k,desc)
-    
-#class DescriptorProxy(object):
-    #def __init__(self,key):
-        #self._key = key
-    #def __get__(self,obj,kls=None):
-        #if obj is None:
-            #return self
-        #else:
-            #return obj._descriptors[self._key].__get__(obj,kls)
-    #def __set__(self,obj,val):
-        #obj._descriptors[self._key].__set__(obj,val)
-    #def __delete__(self,obj):
-        #obj._descriptors[self._key].__delete__(obj)
-        
-from weakref import proxy
-from copy import deepcopy
-class Operation(Bunch):
-    _d = None
-    def __init__(self,f,d):
-        self.f = f
-        self._d = d
-    def __call__(self,*x):
-        return self.f(self._d,*x)
-    
+
+# ----------------------------------------------------------------------
+#   Module Tests
+# ----------------------------------------------------------------------
 
 if __name__ == '__main__':
     
+    # load up
     o = Bunch()
     o['x'] = 'hello'
     o.y = 1
@@ -193,8 +138,17 @@ if __name__ == '__main__':
     def test_function(c):
         return c.x
     
+    class Operation(Bunch):
+        _d = None
+        def __init__(self,f,d):
+            self.f = f
+            self._d = d
+        def __call__(self,*x):
+            return self.f(self._d,*x)
+    
     o.f = Operation(test_function,o)
     
+    # printing
     print o.keys()
     print o
     print o.f()
@@ -206,6 +160,7 @@ if __name__ == '__main__':
         v = o.t.i
     print '%.6f' % (time()-t0)
 
+    # pickling test
     import pickle
 
     d = pickle.dumps(o)
@@ -213,14 +168,31 @@ if __name__ == '__main__':
     
     print ''
     print p    
+    print "should be true:" , p.f._d is p
     
     o.t['h'] = 'changed'
     p.update(o)
 
     print ''
-    #print p
+    print p
     
     
+    
+# ----------------------------------------------------------------------
+#   Gravetart
+# ----------------------------------------------------------------------
+
+    #_descriptors = None
+    #def add_descriptor(self,k,v):
+        ##cls = type(self)
+        ##if not hasattr(cls,'__instance_copy'):
+            ##cls = type(cls.__name__, (cls,), {})
+            ##setattr( cls , '__instance_copy',True)
+            ##self.__class__ = cls
+        
+        #desc = DescriptorProxy(k)
+        #self._descriptors[k] = v
+        #setattr( self.__class__ , k,desc)
     
     #class TestDescriptor(object):
         #def __init__(self,x):
@@ -278,3 +250,35 @@ if __name__ == '__main__':
     #print ''
     #print p['x']
     #print p.y
+    
+    
+    
+    
+        
+        #def __new__(self,*args,**kwarg):
+            #self = Dict.__new__(self,*args,**kwarg)
+            #setattr(self,'_descriptors',{})
+            #return self
+        
+        #def __getattribute__(self,k):
+            #v = Dict.__getattribute__(self,k)
+            #if hasattr(v,'__get__'):
+                #return v.__get__(self,type(self))
+            #else:
+                #return v 
+                
+        #def __setitem__(self,k,v):
+            #try:
+                #super(Dict,self).__getitem__(k).__set__(self,v)
+            #except AttributeError:
+                #super(Dict,self).__setitem__(k,v)
+            #except KeyError:
+                #raise KeyError(k)
+    
+        #def __delitem__(self,k):
+            #try:
+                #super(Dict,self).__getitem__(k).__del__(self)
+            #except AttributeError:
+                #super(Dict,self).__delitem__(k)
+            #except KeyError:
+                #raise KeyError(k)    

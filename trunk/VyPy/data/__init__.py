@@ -17,6 +17,8 @@ from Bunch          import Bunch
 from OrderedBunch   import OrderedBunch
 from IndexableBunch import IndexableBunch
 
+from DataDict       import DataDict
+
 
 odict  = OrderedDict
 idict  = IndexableDict
@@ -24,3 +26,4 @@ hdict  = HashedDict
 bunch  = Bunch
 obunch = OrderedBunch
 ibunch = IndexableBunch
+ddict  = DataDict

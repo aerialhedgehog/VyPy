@@ -1,10 +1,21 @@
 
+# ----------------------------------------------------------------------
+#   Imports
+# ----------------------------------------------------------------------
+
 from IndexableDict import IndexableDict
     
 from make_hashable import make_hashable
 
 
+# ----------------------------------------------------------------------
+#   Hashable Dict
+# ----------------------------------------------------------------------
+
 class HashedDict(IndexableDict):
+    """ An indexable dictionary that permits typically unhashable keys, 
+        such as lists and other dictionaries
+    """
     
     def __getitem__(self,k):
         _k = make_hashable(k) 
@@ -26,11 +37,11 @@ class HashedDict(IndexableDict):
     def has_key(self,k):
         _k = make_hashable(k)
         return super(HashedDict,self).has_key(_k)
-    
-    
 
 
-
+# ----------------------------------------------------------------------
+#   Module Tests
+# ----------------------------------------------------------------------
 
 if __name__ == '__main__':
     

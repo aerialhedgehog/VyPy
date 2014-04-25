@@ -1,35 +1,18 @@
 
-#from Object import Object
+# ----------------------------------------------------------------------
+#   Dictionary (with some upgrades)
+# ----------------------------------------------------------------------
 
 class Dict(dict):
 
-    ## implement descriptor protocol for items
-    #def __getitem__(self,k):
-        #try:
-            #return super(Dict,self).__getitem__(k).__get__(self,type(self))
-        #except AttributeError:
-            #return super(Dict,self).__getitem__(k)
-        #except KeyError:
-            #raise KeyError(k)
-
-    #def __setitem__(self,k,v):
-        #try:
-            #super(Dict,self).__getitem__(k).__set__(self,v)
-        #except AttributeError:
-            #super(Dict,self).__setitem__(k,v)
-        #except KeyError:
-            #raise KeyError(k)
-
-    #def __delitem__(self,k):
-        #try:
-            #super(Dict,self).__getitem__(k).__del__(self)
-        #except AttributeError:
-            #super(Dict,self).__delitem__(k)
-        #except KeyError:
-            #raise KeyError(k)
-
-    ## recuresive updates
     def update(self,other):
+        """ Dict.update(other)
+            updates the dictionary in place, recursing into additional
+            dictionaries inside of other
+            
+            Assumptions:
+              skips keys that start with '_'
+        """
         if not isinstance(other,dict):
             raise TypeError , 'input is not a dictionary type'
         for k,v in other.iteritems():
@@ -42,20 +25,27 @@ class Dict(dict):
                 self[k] = v
         return
     
-    def append(self,key_wild,val):
-        key = self.next_key(key_wild)
-        self[key] = val
-    
     # new keys by wild card integer
     def next_key(self,key_wild):
+        """ Dict.next_key(key_wild):
+            finds the next index to use on a indexed key and applies it to key_wild
+            key_wild is a string containing '%i' to indicate where to increment
+            the key
+        """
         
         if '%i' not in key_wild:
             return key_wild
         
         ksplit = key_wild.split('%i')
         
-        keys = [ int( k.lstrip(ksplit[0]).rstrip(ksplit[1]) ) for k in self.keys()]
-        
+        keys = []
+        for k in keys():
+            try:
+                i = int( k.lstrip(ksplit[0]).rstrip(ksplit[1]) )
+                keys.append(i)
+            except:
+                pass
+            
         if keys:
             key_index = max(keys)+1
         else:
@@ -64,30 +54,62 @@ class Dict(dict):
         key = key_wild % (key_index)
         
         return key
+    
+    # allow override of iterators
+    __iter = dict.__iter__
+    
+    def keys(self):
+        """Dict.keys() -> list of keys in the dictionary"""
+        return list(self.__iter())
+    
+    def values(self):
+        """Dict.values() -> list of values in the dictionary"""
+        return [self[key] for key in self.__iter()]
+    
+    def items(self):
+        """Dict.items() -> list of (key, value) pairs in the dictionary"""
+        return [(key, self[key]) for key in self.__iter()]
+    
+    def iterkeys(self):
+        """Dict.iterkeys() -> an iterator over the keys in the dictionary"""
+        return self.__iter()
+    
+    def itervalues(self):
+        """Dict.itervalues -> an iterator over the values in the dictionary"""
+        for k in self.__iter():
+            yield self[k]
+    
+    def iteritems(self):
+        """od.iteritems -> an iterator over the (key, value) items in the dictionary"""
+        for k in self.__iter():
+            yield (k, self[k])    
 
     # prettier printing
     def __repr__(self):
-        """ Invertible* string-form of a Bunch.
+        """ Invertible* string-form of a Dict.
         """
         keys = self.keys()
         args = ', '.join(['%s=%r' % (key, self[key]) for key in keys if not key.startswith('_')])
         return '%s(%s)' % (self.__class__.__name__, args)
 
     def __str__(self,indent=''):
-        """ String-form of a OrderedBunch.
+        """ String-form of a Dict.
         """
-
+        
         new_indent = '  '
         args = ''
-
+        
         # trunk data name
         if indent: args += '\n'
-
+        
         # print values   
         for key,value in self.iteritems():
+            
+            # skip 'hidden' items
             if key.startswith('_'):
                 continue
             
+            # recurse into other dict types
             if isinstance(value,Dict):
                 if not value:
                     val = '\n'
@@ -96,14 +118,20 @@ class Dict(dict):
                         val = value.__str__(indent+new_indent)
                     except RuntimeError: # recursion limit
                         val = ''
+                        
+            # everything else
             else:
                 val = str(value) + '\n'
-
-            # this key-value
+                
+            # this key-value, indented
             args+= indent + str(key) + ' : ' + val
-
+            
         return args
 
+
+# ----------------------------------------------------------------------
+#   Module Tests
+# ----------------------------------------------------------------------
 
 if __name__ == '__main__':
 
@@ -131,6 +159,40 @@ if __name__ == '__main__':
 
     print ''
     print p
+    
+    
+    
+    
+# ----------------------------------------------------------------------
+#   Gravetart
+# ----------------------------------------------------------------------
+    
+    
+        ## implement descriptor protocol for items
+        #def __getitem__(self,k):
+            #try:
+                #return super(Dict,self).__getitem__(k).__get__(self,type(self))
+            #except AttributeError:
+                #return super(Dict,self).__getitem__(k)
+            #except KeyError:
+                #raise KeyError(k)
+    
+        #def __setitem__(self,k,v):
+            #try:
+                #super(Dict,self).__getitem__(k).__set__(self,v)
+            #except AttributeError:
+                #super(Dict,self).__setitem__(k,v)
+            #except KeyError:
+                #raise KeyError(k)
+    
+        #def __delitem__(self,k):
+            #try:
+                #super(Dict,self).__getitem__(k).__del__(self)
+            #except AttributeError:
+                #super(Dict,self).__delitem__(k)
+            #except KeyError:
+                #raise KeyError(k)    
+    
 
 
     #class TestDescriptor(object):
