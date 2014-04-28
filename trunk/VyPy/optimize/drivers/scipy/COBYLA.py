@@ -45,7 +45,7 @@ class COBYLA(Driver):
         
         # nice: store result = fmin,xmin,iterations,time to problem history
 
-        x_min = self.problem.variables.scaled.pack(x_min)
+        x_min = self.problem.variables.scaled.unpack_array(x_min)
         f_min = self.problem.objectives[0].evaluator.function(x_min)        
         
         # done!

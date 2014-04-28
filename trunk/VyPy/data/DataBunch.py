@@ -18,8 +18,8 @@ from VyPy.tools.arrays import atleast_2d_col, array_type, matrix_type
 #   Data Dictionary
 # ----------------------------------------------------------------------
 
-class DataDict(IndexableBunch):
-    """ DataDict()
+class DataBunch(IndexableBunch):
+    """ DataBunch()
         
         a dict-type container with attribute and item style access
         initializes with default attributes
@@ -56,7 +56,7 @@ class DataDict(IndexableBunch):
         return self
     
     def __init__(self,*args,**kwarg):
-        """ initializes DataDict()
+        """ initializes DataBunch()
         """
         
         # handle input data (ala class factory)
@@ -98,35 +98,35 @@ class DataDict(IndexableBunch):
         self[key] = value    
     
     def find_instances(self,data_type):
-        """ DataDict.find_instances(data_type)
+        """ DataBunch.find_instances(data_type)
             
-            searches DataDict() for instances of given data_type
+            searches DataBunch() for instances of given data_type
             
             Inputs:
                 data_type  - a class type, for example type(myData)
                 
             Outputs:
-                data - DataDict() of the discovered data
+                data - DataBunch() of the discovered data
         """
         
-        output = DataDict()
+        output = DataBunch()
         for key,value in self.iteritems():
             if isinstance(value,type):
                 output[key] = value
         return output
     
     def get_bases(self):
-        """ find all DataDict() base classes, return in a list """
+        """ find all DataBunch() base classes, return in a list """
         klass = self.__class__
         klasses = []
         while klass:
-            if issubclass(klass,DataDict): 
+            if issubclass(klass,DataBunch): 
                 klasses.append(klass)
                 klass = klass.__base__
             else:
                 klass = None
         if not klasses: # empty list
-            raise TypeError , 'class %s is not of type DataDict()' % self.__class__
+            raise TypeError , 'class %s is not of type DataBunch()' % self.__class__
         return klasses
     
     def typestring(self):
@@ -150,29 +150,21 @@ class DataDict(IndexableBunch):
 if __name__ == '__main__':
     
 
-    d = DataDict()
+    d = DataBunch()
     d.tag = 'data name'
     d['value'] = 132
-    d.options = DataDict()
+    d.options = DataBunch()
     d.options.field = 'of greens'
     d.options.half  = 0.5
     print d
     
-    # speed test
-    from time import time, sleep
-    t0 = time()
-    for i in range(100000):
-        v = d.options.field
-    print '%.6f' % (time()-t0)    
-    
-
     
     ones = np.ones([10,1])
         
-    m = DataDict()
+    m = DataBunch()
     m.tag = 'numerical data'
     m.hieght = ones * 1.
-    m.rates = DataDict()
+    m.rates = DataBunch()
     m.rates.angle  = ones * 3.14
     m.rates.slope  = ones * 20.
     m.rates.special = 'nope'
@@ -191,4 +183,25 @@ if __name__ == '__main__':
     
     print m.unpack_array(V)
     print m.unpack_array(M)
+    
+    
+    # speed test
+    from time import time, sleep
+    t0 = time()
+    for i in range(100000):
+        v = d.options.half
+    t1 = time()-t0
+    
+    class SimpleBunch:
+        pass
+    z = SimpleBunch()
+    z.t = SimpleBunch
+    z.t.i = 0
+    t0 = time()
+    for i in range(100000):
+        v = z.t.i
+    t2 = time()-t0
+    
+    print 'Bunch:       %.6f' % (t1)
+    print 'SimpleBunch: %.6f' % (t2)    
     

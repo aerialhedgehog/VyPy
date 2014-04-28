@@ -5,7 +5,7 @@
 # ----------------------------------------------------------------------
 
 from Dict import Dict
-
+from Property import Property
 
 # ----------------------------------------------------------------------
 #   Bunch 
@@ -18,25 +18,26 @@ class Bunch(Dict):
         
     """
     
+    def __new__(klass,*args,**kwarg):
+        self = Dict.__new__(klass,*args,**kwarg)
+        
+        # initialize properties
+        for k in dir(klass):
+            obj = getattr(klass,k)
+            if isinstance(obj,Property):
+                obj._key = k
+        return self
+    
     __getitem__ = Dict.__getattribute__
     __setitem__ = Dict.__setattr__
     __delitem__ = Dict.__delattr__
-    
-    #def __getitem__(self,k):
-        #return self.__getattribute__(k)
-    
-    #def __setitem__(self,k,v):
-        #self.__setattr__(k,v)
-    
-    #def __delitem__(self,k):
-        #self.__delattr__(k)
         
     def clear(self):
         self.__dict__.clear()
         
     def copy(self):
         return self.__dict__.copy()
-
+    
     def get(self,k,d=None):
         return self.__dict__.get(k,d)
     
@@ -139,12 +140,12 @@ if __name__ == '__main__':
         return c.x
     
     class Operation(Bunch):
-        _d = None
+        d = Property()
         def __init__(self,f,d):
             self.f = f
-            self._d = d
+            self.d = d
         def __call__(self,*x):
-            return self.f(self._d,*x)
+            return self.f(self.d,*x)
     
     o.f = Operation(test_function,o)
     
@@ -152,13 +153,6 @@ if __name__ == '__main__':
     print o.keys()
     print o
     print o.f()
-    
-    # speed test
-    from time import time, sleep
-    t0 = time()
-    for i in range(100000):
-        v = o.t.i
-    print '%.6f' % (time()-t0)
 
     # pickling test
     import pickle
@@ -168,7 +162,7 @@ if __name__ == '__main__':
     
     print ''
     print p    
-    print "should be true:" , p.f._d is p
+    print "should be true:" , p.f.d is p
     
     o.t['h'] = 'changed'
     p.update(o)
@@ -176,6 +170,25 @@ if __name__ == '__main__':
     print ''
     print p
     
+    # speed test
+    from time import time, sleep
+    t0 = time()
+    for i in range(100000):
+        v = o.t.i
+    t1 = time()-t0
+    
+    class SimpleBunch:
+        pass
+    z = SimpleBunch()
+    z.t = SimpleBunch
+    z.t.i = 0
+    t0 = time()
+    for i in range(100000):
+        v = z.t.i
+    t2 = time()-t0
+    
+    print 'Bunch:       %.6f' % (t1)
+    print 'SimpleBunch: %.6f' % (t2)    
     
     
 # ----------------------------------------------------------------------

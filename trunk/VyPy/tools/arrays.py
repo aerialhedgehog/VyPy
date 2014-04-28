@@ -84,4 +84,9 @@ def atleast_2d(A,oned_as='row'):
             
     return A
 
+def squeeze_jagged_array(M):
+    return np.vstack([ atleast_2d_col(b).T for b in M])
+
+def squeeze_jagged_vector(v):
+    return np.hstack([ np.squeeze(x) for x in v ])
 

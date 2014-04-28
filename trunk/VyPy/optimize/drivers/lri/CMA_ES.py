@@ -53,7 +53,7 @@ class CMA_ES(Driver):
         x_min = result[0].tolist()
         f_min = result[1]
         
-        x_min = self.problem.variables.scaled.pack(x_min)
+        x_min = self.problem.variables.scaled.unpack_array(x_min)
         f_min = self.problem.objectives[0].evaluator.function(x_min)
         
         # done!

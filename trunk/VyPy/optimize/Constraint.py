@@ -7,7 +7,7 @@ from Evaluator  import Evaluator
 from Equality   import Equality
 from Inequality import Inequality
 
-from VyPy.data import IndexableDict, Object
+from VyPy.data import IndexableDict, Descriptor
 from VyPy.data.input_output import flatten_list
 
 
@@ -17,38 +17,17 @@ class_map = {
     '<' : Inequality,
 }
    
-
-# ----------------------------------------------------------------------
-#   Constraint Function
-# ----------------------------------------------------------------------
-
-class Constraint(Evaluator):
-    
-    Container = None
-    
-    def __init__( self ):
-        raise NotImplementedError
         
-    def function(self,x):
-        raise NotImplementedError
-    
-    def gradient(self,x):
-        raise NotImplementedError
-    
-    def hessian(self,x):
-        raise NotImplementedError
-
-
 # ----------------------------------------------------------------------
 #   Constraint Container
 # ----------------------------------------------------------------------
 
-class Constraints(Object):
+class Constraints(object):
     
     def __init__(self,variables):
-        self.variables    = variables
-        self.equalities   = Equality.Container(self.variables)
-        self.inequalities = Inequality.Container(self.variables)
+        self._variables    = variables
+        self._equalities   = Equality.Container(self.variables)
+        self._inequalities = Inequality.Container(self.variables)
         
         self._container_map = {
             '=' : self.equalities ,
@@ -56,6 +35,10 @@ class Constraints(Object):
             '<' : self.inequalities,
         }            
     
+    # setup descriptors
+    variables    = Descriptor('_variables')
+    equalities   = Descriptor('_equalities')
+    inequalities = Descriptor('_inequalities')    
     
     def __set__(self,problem,arg_list):            
         self.clear()
@@ -65,12 +48,21 @@ class Constraints(Object):
         self.equalities.clear()
         self.inequalities.clear()
     
-    def append(self, evaluator, tag, sense, edge=0.0, scale=1.0 ):
+    def append(self, evaluator, tag='c', sense='=', edge=0.0, scale=1.0 ):
         
+        if isinstance(evaluator,(Equality,Inequality)):
+            constraint = evaluator
+            constraint.variables = self.variables
+        else:
+            constraint = class_map[sense](evaluator,tag,sense,edge,scale,self.variables)
+        
+        constraint.__check__()
+        
+        sense = constraint.sense
         if sense not in class_map.keys():
-            raise KeyError , 'invalid constraint sense "%s"' % sense
+            raise KeyError , 'invalid constraint sense "%s"' % sense        
         
-        constraint = class_map[sense](self.variables,evaluator,tag,sense,edge,scale)
+        tag = constraint.tag
         self._container_map[sense][tag] = constraint
         
     def extend(self,arg_list):
@@ -99,8 +91,24 @@ class Constraints(Object):
         return repr(self.equalities) + '\n' + repr(self.inequalities)
     def __str__(self):
             return str(self.equalities) + '\n' + str(self.inequalities)
+
+
+# ----------------------------------------------------------------------
+#   Constraint Function
+# ----------------------------------------------------------------------
+
+class Constraint(Evaluator):
     
-# ----------------------------------------------------------------------
-#   Container Linking
-# ----------------------------------------------------------------------
-Constraint.Container = Constraints
+    Container = Constraints
+    
+    def __init__( self ):
+        pass
+        
+    def function(self,x):
+        raise NotImplementedError
+    
+    def gradient(self,x):
+        raise NotImplementedError
+    
+    def hessian(self,x):
+        raise NotImplementedError

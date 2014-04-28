@@ -7,6 +7,7 @@ from filelock import filelock
 from make_hashable import make_hashable
 
 from Object         import Object
+from Descriptor     import Descriptor
 
 from Dict           import Dict
 from OrderedDict    import OrderedDict
@@ -16,8 +17,9 @@ from HashedDict     import HashedDict
 from Bunch          import Bunch
 from OrderedBunch   import OrderedBunch
 from IndexableBunch import IndexableBunch
+from Property       import Property
 
-from DataDict       import DataDict
+from DataBunch       import DataBunch
 
 
 odict  = OrderedDict
@@ -26,4 +28,4 @@ hdict  = HashedDict
 bunch  = Bunch
 obunch = OrderedBunch
 ibunch = IndexableBunch
-ddict  = DataDict
+ddict  = DataBunch

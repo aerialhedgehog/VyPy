@@ -8,3 +8,5 @@ from Evaluator  import Evaluator
 from Problem    import Problem
 
 import drivers
+
+from VyPy.data import scaling

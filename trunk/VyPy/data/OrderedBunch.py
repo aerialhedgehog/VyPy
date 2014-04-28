@@ -6,22 +6,8 @@
 
 from Bunch import Bunch
 from OrderedDict import OrderedDict
+from Property import Property
     
-# ----------------------------------------------------------------------
-#   Helper Class
-# ----------------------------------------------------------------------
-
-# objects hidden in the dictionary
-class HiddenItem(object):
-    def __init__(self,key):
-        self._key = key
-    def __get__(self,obj,kls=None):
-        return dict.__getitem__(obj,self._key)
-    def __set__(self,obj,val):
-        dict.__setitem__(obj,self._key,val)
-    def __delete__(self,obj):
-        dict.__delitem__(obj,self._key)
-
 # ----------------------------------------------------------------------
 #   Ordered Bunch
 # ----------------------------------------------------------------------
@@ -30,8 +16,8 @@ class OrderedBunch(Bunch,OrderedDict):
     """ An ordered dictionary that provides attribute-style access.
     """
     
-    _root = HiddenItem('_root')
-    _map  = HiddenItem('_map')
+    _root = Property()
+    _map  = Property()
     
     def __new__(klass,*args,**kwarg):
 
@@ -44,8 +30,8 @@ class OrderedBunch(Bunch,OrderedDict):
         except:
             root = [] # sentinel node
             root[:] = [root, root, None]
-            object.__setattr__(self,'_root',root)
-            object.__setattr__(self,'_map',{})
+            self._root = root
+            self._map  = {}
         
         return self
 
@@ -53,7 +39,7 @@ class OrderedBunch(Bunch,OrderedDict):
         """od.__setitem__(i, y) <==> od[i]=y"""
         # Setting a new item creates a new link which goes at the end of the linked
         # list, and the inherited dictionary is updated with the new key/value pair.
-        if key not in self:
+        if key not in dir(self):
             root = self._root
             last = root[0]
             map  = self._map
@@ -220,6 +206,8 @@ def _reconstructor(klass,items):
 if __name__ == '__main__':
     
     o = OrderedBunch()
+    print 'should be zero:' , len(o)
+    
     o['x'] = 'hello'
     o.y = 1
     o['z'] = [3,4,5]
@@ -242,5 +230,14 @@ if __name__ == '__main__':
     
     print ''
     print p
+    
+    class TestClass(OrderedBunch):
+        a = Property('a')
+        def __init__(self):
+            self.a = 'hidden!'
+            self.b = 'hello!'
+    
+    c = TestClass()
+    print c
     
     

@@ -20,6 +20,8 @@ class Object(object):
             super(Object,self).__getattribute__(k).__set__(self,v)
         except AttributeError:
             super(Object,self).__setattr__(k,v)
+        except AttributeError:
+            raise AttributeError(k)
     
     def __delattr__(self,k):
         try:

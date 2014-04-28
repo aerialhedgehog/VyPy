@@ -7,86 +7,7 @@ from Evaluator import Evaluator
 
 from VyPy.data import IndexableDict
 from VyPy.data.input_output import flatten_list
-
-
-# ----------------------------------------------------------------------
-#   Inequality Function
-# ----------------------------------------------------------------------
-
-class Inequality(Evaluator):
-    
-    Container = None
-    
-    def __init__( self, variables, evaluator, 
-                  tag, sense='<', edge=0.0, 
-                  scale=1.0 ):
-        
-        Evaluator.__init__(self)
-        
-        if not isinstance(evaluator, Evaluator):
-            evaluator = Evaluator(function=evaluator)
-            
-        if sense not in '><':
-            raise TypeError , 'sense must be > or <'
-                
-        self.evaluator = evaluator
-        self.tag       = tag
-        self.sign      = sense
-        self.edge      = edge
-        self.scale     = scale
-        self.variables = variables
-        
-        if evaluator.gradient is None:
-            self.gradient = None
-        if evaluator.hessian is None:
-            self.hessian = None
-        
-    def function(self,x):
-        
-        x = self.variables.scaled.pack(x)
-        
-        func = self.evaluator.function
-        tag  = self.tag
-        sgn  = self.sign
-        val  = self.edge
-        scl  = self.scale
-        
-        if sgn == '>':
-            result = ( val - func(x)[tag] )
-        elif sgn == '<':
-            result = ( func(x)[tag] - val )
-        else:
-            raise Exception, 'unrecognized sign %s' % sgn        
-        
-        result = result * scl
-                
-        return result
-    
-    def gradient(self,x):
-        
-        x = self.variables.scaled.pack(x)
-        
-        func = self.evaluator.gradient
-        tag  = self.tag
-        sgn  = self.sign
-        scl  = self.scale
-        
-        if sgn == '>':
-            result = -1* func(x)[tag]
-        elif sgn == '<':
-            result = +1* func(x)[tag]
-        else:
-            raise Exception, 'unrecognized sign %s' % sgn        
-        
-        result = result * scl
-        
-        return result 
-    
-    def hessian(self,x):
-        raise NotImplementedError
-
-    def __repr__(self):
-        return "<Inequality '%s'>" % self.tag
+from VyPy.tools.arrays import atleast_2d
 
 # ----------------------------------------------------------------------
 #   Inequality Container
@@ -100,10 +21,17 @@ class Inequalities(IndexableDict):
     def __set__(self,problem,arg_list):            
         self.clear()
         self.extend(arg_list)
-    
+        
     def append(self,*args):
-        args = [self.variables] + flatten_list(args)
-        inequality = Inquality(*args)
+        evaluator = args[0]
+        if isinstance(evaluator,Inequality):
+            inequality = evaluator
+            inequality.variables = self.variables
+        else:
+            args = flatten_list(args) + [self.variables]
+            inequality = Inequality(*args)
+        
+        inequality.__check__()
         tag = inequality.tag
         self[tag] = inequality
         
@@ -122,6 +50,9 @@ class Inequalities(IndexableDict):
     def evaluators(self):
         return [ con.evaluator for con in self.values() ]
     
+    def edges_array(self):
+        return np.vstack([ atleast_2d(x,'col') for x in self.edges() ])       
+    
     def set(senses=None,edges=None,scales=None):
         if senses:
             for i,s in enumerate(senses):
@@ -135,6 +66,85 @@ class Inequalities(IndexableDict):
     
     
 # ----------------------------------------------------------------------
-#   Container Linking
+#   Inequality Function
 # ----------------------------------------------------------------------
-Inequality.Container = Inequalities
+
+class Inequality(Evaluator):
+    
+    Container = Inequalities
+    
+    def __init__( self, evaluator=None, 
+                  tag='cieq', sense='<', edge=0.0, 
+                  scale=1.0,
+                  variables=None):
+        
+        Evaluator.__init__(self)
+                
+        self.evaluator = evaluator
+        self.tag       = tag
+        self.sense     = sense
+        self.edge      = edge
+        self.scale     = scale
+        self.variables = variables
+
+    def __check__(self):
+
+        if not isinstance(self.evaluator, Evaluator):
+            self.evaluator = Evaluator(function=self.evaluator)
+            
+        if self.sense not in '><':
+            raise TypeError , 'sense must be > or <'
+        
+        if self.evaluator.gradient is None:
+            self.gradient = None
+        if self.evaluator.hessian is None:
+            self.hessian = None
+        
+    def function(self,x):
+        
+        x = self.variables.scaled.unpack_array(x)
+        
+        func = self.evaluator.function
+        tag  = self.tag
+        snz  = self.sense
+        val  = self.edge
+        scl  = self.scale
+        
+        if snz == '>':
+            result = val*scl - func(x)[tag]*scl
+        elif snz == '<':
+            result = func(x)[tag]*scl - val*scl
+        else:
+            raise Exception, 'unrecognized sense %s' % snz        
+        
+        result = atleast_2d(result,'col')
+                
+        return result
+    
+    def gradient(self,x):
+        
+        x = self.variables.scaled.unpack_array(x)
+        
+        func = self.evaluator.gradient
+        tag  = self.tag
+        snz  = self.sense
+        scl  = self.scale
+        
+        if snz == '>':
+            result = -1* func(x)[tag]
+        elif snz == '<':
+            result = +1* func(x)[tag]
+        else:
+            raise Exception, 'unrecognized sense %s' % snz        
+        
+        result = result * scl
+        
+        result = atleast_2d(result,'row')
+        
+        return result 
+    
+    def hessian(self,x):
+        raise NotImplementedError
+
+    def __repr__(self):
+        return "<Inequality '%s'>" % self.tag

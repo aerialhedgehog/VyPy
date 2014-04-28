@@ -1,5 +1,6 @@
 
 from VyPy.optimize.drivers import Driver
+from VyPy.tools.arrays import squeeze_jagged_array, squeeze_jagged_vector
 import numpy as np
 
 # ----------------------------------------------------------------------
@@ -29,10 +30,10 @@ class SLSQP(Driver):
         
         # inputs
         func           = self.func
-        x0             = problem.variables.scaled.initials()
+        x0             = problem.variables.scaled.initials_array()
         f_eqcons       = self.f_eqcons
         f_ieqcons      = self.f_ieqcons
-        bounds         = problem.variables.scaled.bounds()
+        bounds         = problem.variables.scaled.bounds_array()
         fprime         = self.fprime
         fprime_ieqcons = self.fprime_ieqcons
         fprime_eqcons  = self.fprime_eqcons  
@@ -58,7 +59,7 @@ class SLSQP(Driver):
             full_output    = True           ,
         )
         
-        x_min = self.problem.variables.scaled.pack(x_min)
+        x_min = self.problem.variables.scaled.unpack_array(x_min)
         f_min = self.problem.objectives[0].evaluator.function(x_min)
         
         # done!
@@ -67,6 +68,7 @@ class SLSQP(Driver):
     def func(self,x):
         objective = self.problem.objectives[0]
         result = objective.function(x)
+        result = np.squeeze(result)
         return result
         
     def f_ieqcons(self,x):
@@ -77,7 +79,8 @@ class SLSQP(Driver):
             res = -1 * res
             result.append(res)
         if result:
-            result = np.hstack(result).T
+            result = np.vstack(result)
+            result = np.squeeze(result)
         return result
     
     def f_eqcons(self,x):
@@ -87,13 +90,15 @@ class SLSQP(Driver):
             res = equality.function(x)
             result.append(res)
         if result:
-            result = np.hstack(result).T
+            result = np.vstack(result)
+            result = np.squeeze(result)
         return result
 
     def fprime(self,x):
         objective = self.problem.objectives[0]
         result = objective.gradient(x)
-        result = np.hstack(result).T
+        result = np.vstack(result)
+        result = np.squeeze(result)
         return result
     
     def fprime_ieqcons(self,x):
@@ -104,7 +109,7 @@ class SLSQP(Driver):
             res = -1 * res
             result.append(res)
         if result:
-            result = np.hstack(result).T
+            result = np.vstack(result)
         return result
     
     def fprime_eqcons(self,x):
@@ -114,5 +119,5 @@ class SLSQP(Driver):
             res = equality.gradient(x)
             result.append(res)
         if result:
-            result = np.hstack(result).T
+            result = np.vstack(result)
         return result
