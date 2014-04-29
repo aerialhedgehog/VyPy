@@ -3,11 +3,68 @@
 #   Imports
 # ----------------------------------------------------------------------
 
-from Evaluator import Evaluator
+from Evaluator  import Evaluator
+from Constraint import Constraint
 
 from VyPy.data import IndexableDict
 from VyPy.data.input_output import flatten_list
 from VyPy.tools.arrays import atleast_2d
+
+
+# ----------------------------------------------------------------------
+#   Equality Function
+# ----------------------------------------------------------------------
+
+class Equality(Constraint):
+    
+    Container = None
+    
+    def __init__( self, evaluator=None, 
+                  tag='ceq', sense='=', edge=0.0, 
+                  scale=1.0,
+                  variables=None ):
+        
+        Constraint.__init__( self,evaluator,
+                             tag,sense,edge,
+                             scale,variables )
+         
+    def function(self,x):
+        
+        x = self.variables.scaled.unpack_array(x)
+        
+        func = self.evaluator.function
+        tag  = self.tag
+        val  = self.edge
+        scl  = self.scale
+        
+        result = func(x)[tag]*scl - val*scl
+        
+        result = atleast_2d(result,'col')
+        
+        return result
+    
+    def gradient(self,x):
+        
+        x = self.variables.scaled.unpack_array(x)
+        
+        func = self.evaluator.gradient
+        tag  = self.tag
+        scl  = self.scale
+        
+        result = func(x)[tag]
+        
+        result = result * scl ## !!! PROBLEM WHEN SCL is NOT CENTERED
+        
+        result = atleast_2d(result,'row')
+        
+        return result    
+
+    def hessian(self,x):
+        raise NotImplementedError
+
+    def __repr__(self):
+        return "<Equality '%s'>" % self.tag
+
 
 # ----------------------------------------------------------------------
 #   Equality Container
@@ -22,14 +79,16 @@ class Equalities(IndexableDict):
         self.clear()
         self.extend(arg_list)
     
-    def append(self,*args):
-        evaluator = args[0]
-        if isinstance(evaluator,Equality):
+    def append(self, evaluator, 
+               tag=None, sense='=', edge=0.0, 
+               scale=1.0 ):
+        
+        if tag is None and isinstance(evaluator,Equality):
             equality = evaluator
             equality.variables = self.variables
         else:
             args = flatten_list(args) + [self.variables]
-            equality = Equality(*args)
+            equality = Equality(evaluator,tag,sense,edge,scale,self.variables)
         
         equality.__check__()
         tag = equality.tag
@@ -61,76 +120,7 @@ class Equalities(IndexableDict):
             for i,s in enumerate(scales):
                 self[i].scale = s      
                 
-
 # ----------------------------------------------------------------------
-#   Equality Function
+#   Equality Container
 # ----------------------------------------------------------------------
-
-class Equality(Evaluator):
-    
-    Container = Equalities
-    
-    def __init__( self, evaluator=None, 
-                  tag='ceq', sense='=', edge=0.0, 
-                  scale=1.0,
-                  variables=None):
-        
-        Evaluator.__init__(self)
-        
-        self.evaluator = evaluator
-        self.tag       = tag
-        self.sense     = sense
-        self.edge      = edge
-        self.scale     = scale
-        self.variables = variables
-        
-
-    def __check__(self):
-
-        if not isinstance(self.evaluator, Evaluator):
-            self.evaluator = Evaluator(function=self.evaluator)
-        
-        if self.evaluator.gradient is None:
-            self.gradient = None
-        if self.evaluator.hessian is None:
-            self.hessian = None
-         
-    def function(self,x):
-        
-        x = self.variables.scaled.unpack_array(x)
-        
-        func = self.evaluator.function
-        tag  = self.tag
-        val  = self.edge
-        scl  = self.scale
-        
-        result = func(x)[tag]*scl - val*scl
-        
-        result = atleast_2d(result,'col')
-        
-        return result
-    
-    def gradient(self,x):
-        
-        x = self.variables.scaled.unpack_array(x)
-        
-        func = self.evaluator.gradient
-        tag  = self.tag
-        scl  = self.scale
-        
-        result = func(x)[tag]
-        
-        result = result * scl
-        
-        result = atleast_2d(result,'row')
-        
-        return result    
-
-    def hessian(self,x):
-        raise NotImplementedError
-
-    def __repr__(self):
-        return "<Equality '%s'>" % self.tag
-
-      
-    
+Equality.Container = Equalities

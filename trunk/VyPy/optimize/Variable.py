@@ -13,11 +13,52 @@ ibunch = IndexableBunch
 
 iterable_type = (list,tuple,array_type,matrix_type)
 
-from types import MethodType
 
 # ----------------------------------------------------------------------
-#   Variables
+#   Variable Object
 # ----------------------------------------------------------------------
+
+class Variable(object):
+    
+    Container = None
+    
+    def __init__( self, tag='x%i', initial=0.0,
+                  bounds=(1.e-100,1.e+100), scale=1.0 ):
+        
+        self.tag     = tag
+        self.initial = initial
+        self.bounds  = bounds
+        self.scale   = scale
+        self.scaled  = None
+    
+    def __repr__(self):
+        return '<Variable %s>' % self.tag
+
+
+# ----------------------------------------------------------------------
+#   Scaled Variable Object
+# ----------------------------------------------------------------------
+
+class ScaledVariable(object):
+
+    Container = None
+    
+    def __init__( self, tag, initial=0.0,
+                  bounds=(1.e-100,1.e+100), scale=1.0 ):
+        
+        self.tag     = tag
+        self.initial = initial*scale
+        self.bounds  = tuple([ b*scale for b in bounds ])
+        self.scale   = scale
+    
+    def __repr__(self):
+        return '<ScaledVariable %s>' % self.tag
+
+
+# ----------------------------------------------------------------------
+#   Variables Container
+# ----------------------------------------------------------------------
+
 class Variables(IndexableDict):
     
     def __init__(self):
@@ -26,7 +67,7 @@ class Variables(IndexableDict):
     def __set__(self,problem,arg_list):
         self.clear()
         self.extend(arg_list)
-
+        
     def extend(self,arg_list):
         for args in arg_list:
             self.append(*args)
@@ -42,9 +83,10 @@ class Variables(IndexableDict):
             scale   = variable.scale
         else:
             tag = self.next_key(tag)
-            variable   = Variable(tag,initial,bounds,scale)
+            variable = Variable(tag,initial,bounds,scale)
             
         scaled_var = ScaledVariable(tag,initial,bounds,scale)
+        variable.scaled = scaled_var
         
         if self.has_key(tag):
             print 'Warning: overwriting variable %s' % tag
@@ -64,28 +106,20 @@ class Variables(IndexableDict):
         variables = ibunch(zip(self.keys(),self.initials()))
         variables.unpack_array(values)
         
-        ## Unpack Variables
-        #variables = ibunch()
-        
-        #for tag,val in zip(self.tags(),values):
-            #variables[tag] = val
-        
         return variables
     
     def pack_array(self,variables):
         """ values = Variables.pack_array(vars)
             pack an ordered dictionary of variables into
-            a list of values
+            a 1D array of values
         """
         
         if isinstance(variables,idict):
             # pack Variables
             values = variables.pack_array('vector')
-            
         elif isinstance(variables,iterable_type):
             # already packed
-            values = np.squeeze(variables)
-                    
+            values = np.squeeze(variables)  
         else:
             raise Exception, 'could not pack variables: %s' % variables
                 
@@ -121,8 +155,9 @@ class Variables(IndexableDict):
     
 
 # ----------------------------------------------------------------------
-#   Scaled Variables
+#   Scaled Variables Container
 # ----------------------------------------------------------------------   
+
 class ScaledVariables(Variables):
         
     def __init__(self,variables):
@@ -163,47 +198,20 @@ class ScaledVariables(Variables):
     def set(self,initials=None,bounds=None,scales=None):
         if initials:
             for i,(v,s) in enumerate(zip(initials,self.scales)):
-                self[i].initial = v/s
-                self.scaled[i].initial = v
+                self[i].initial = v
+                self.unscaled[i].initial = v/s
         if bounds:
             for i,(bnd,s) in enumerate(zip(bounds,self.scales)):
-                self[i].bounds = [ v/s for v in bnd ]
-                self[i].scaled.bounds = bnd
+                self[i].bounds = bnd
+                self[i].unscaled.bounds = [ v/s for v in bnd ]
         if scales:
             for i,s in enumerate(scales):
                 self[i].scale = s
-                self[i].scaled.scale = s                
-    
+                self[i].unscaled.scale = s
+                
 # ----------------------------------------------------------------------
-#   A Variable
-# ----------------------------------------------------------------------
-class Variable(object):
-    
-    Container = Variables
-    
-    def __init__( self, tag='x%i', initial=0.0,
-                  bounds=(1.e-100,1.e+100), scale=1.0 ):
-        self.tag     = tag
-        self.initial = initial
-        self.bounds  = bounds
-        self.scale   = scale
-    
-    def __repr__(self):
-        return '<Variable %s>' % self.tag
+#   Scaled Variables Container
+# ----------------------------------------------------------------------   
 
-# ----------------------------------------------------------------------
-#   A Scaled Variable
-# ----------------------------------------------------------------------
-class ScaledVariable(object):
-
-    Container = ScaledVariables
-    
-    def __init__( self, tag, initial=0.0,
-                  bounds=(1.e-100,1.e+100), scale=1.0 ):
-        self.tag     = tag
-        self.initial = initial*scale
-        self.bounds  = tuple([ b*scale for b in bounds ])
-        self.scale   = scale
-    
-    def __repr__(self):
-        return '<ScaledVariable %s>' % self.tag
+Variable.Container       = Variables
+ScaledVariable.Container = ScaledVariables

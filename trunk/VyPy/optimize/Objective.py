@@ -7,47 +7,6 @@ from Evaluator import Evaluator
 
 from VyPy.data import IndexableDict
 
-
-# ----------------------------------------------------------------------
-#   Objectives Container
-# ----------------------------------------------------------------------
-
-class Objectives(IndexableDict):
-    
-    def __init__(self,variables):
-        self.variables = variables
-    
-    def __set__(self,problem,arg_list):            
-        self.clear()
-        self.extend(arg_list)
-    
-    def append(self,evaluator,tag,scale=1.0):
-        if isinstance(evaluator,Objective):
-            objective = evaluator
-            objective.variables = self.variables
-        else:
-            objective = Objective(evaluator,tag,scale,self.variables)
-        
-        objective.__check__()
-        tag = objective.tag
-        self[tag] = objective
-        
-    def extend(self,arg_list):
-        for args in arg_list:
-            self.append(*args)
-        
-    def tags(self):
-        return self.keys()
-    def scales(self):
-        return [ obj.scale for obj in self.values() ]
-    def evaluators(self):
-        return [ obj.evaluator for obj in self.values() ]
-    
-    def set(self,scales=None):
-        if scales:
-            for i,s in enumerate(scales):
-                self[i].scale = s
-    
     
 # ----------------------------------------------------------------------
 #   Objective Function
@@ -55,7 +14,7 @@ class Objectives(IndexableDict):
 
 class Objective(Evaluator):
     
-    Container = Objectives
+    Container = None
     
     # TODO: tag=None
     def __init__(self,evaluator=None,tag='f',scale=1.0,variables=None,):
@@ -101,12 +60,59 @@ class Objective(Evaluator):
         
         result = func(x)[tag]
         
-        result = result * scl
+        result = result * scl ## !!! PROBLEM WHEN SCL is NOT CENTERED
         
-        return result    
+        return result
     
     def hessian(self,x):
         raise NotImplementedError
     
     def __repr__(self):
         return "<Objective '%s'>" % self.tag
+    
+    
+# ----------------------------------------------------------------------
+#   Objectives Container
+# ----------------------------------------------------------------------
+
+class Objectives(IndexableDict):
+    
+    def __init__(self,variables):
+        self.variables = variables
+    
+    def __set__(self,problem,arg_list):            
+        self.clear()
+        self.extend(arg_list)
+    
+    def append(self,evaluator,tag=None,scale=1.0):
+        if tag is None and isinstance(evaluator,Objective):
+            objective = evaluator
+            objective.variables = self.variables
+        else:
+            objective = Objective(evaluator,tag,scale,self.variables)
+        
+        objective.__check__()
+        tag = objective.tag
+        self[tag] = objective
+        
+    def extend(self,arg_list):
+        for args in arg_list:
+            self.append(*args)
+        
+    def tags(self):
+        return self.keys()
+    def scales(self):
+        return [ obj.scale for obj in self.values() ]
+    def evaluators(self):
+        return [ obj.evaluator for obj in self.values() ]
+    
+    def set(self,scales=None):
+        if scales:
+            for i,s in enumerate(scales):
+                self[i].scale = s
+                
+# ----------------------------------------------------------------------
+#   Handle Linking
+# ----------------------------------------------------------------------
+Objective.Container = Objectives
+

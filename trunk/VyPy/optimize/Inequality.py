@@ -3,102 +3,29 @@
 #   Imports
 # ----------------------------------------------------------------------
 
-from Evaluator import Evaluator
+from Evaluator  import Evaluator
+from Constraint import Constraint
 
 from VyPy.data import IndexableDict
 from VyPy.data.input_output import flatten_list
 from VyPy.tools.arrays import atleast_2d
 
-# ----------------------------------------------------------------------
-#   Inequality Container
-# ----------------------------------------------------------------------
-
-class Inequalities(IndexableDict):
-    
-    def __init__(self,variables):
-        self.variables = variables
-    
-    def __set__(self,problem,arg_list):            
-        self.clear()
-        self.extend(arg_list)
-        
-    def append(self,*args):
-        evaluator = args[0]
-        if isinstance(evaluator,Inequality):
-            inequality = evaluator
-            inequality.variables = self.variables
-        else:
-            args = flatten_list(args) + [self.variables]
-            inequality = Inequality(*args)
-        
-        inequality.__check__()
-        tag = inequality.tag
-        self[tag] = inequality
-        
-    def extend(self,arg_list):
-        for args in arg_list:
-            self.append(*args)
-                        
-    def tags(self):
-        return self.keys()
-    def senses(self):
-        return [ con.sense for con in self.values() ]
-    def edges(self):
-        return [ con.edge for con in self.values() ]
-    def scales(self):
-        return [ con.scale for con in self.values() ]
-    def evaluators(self):
-        return [ con.evaluator for con in self.values() ]
-    
-    def edges_array(self):
-        return np.vstack([ atleast_2d(x,'col') for x in self.edges() ])       
-    
-    def set(senses=None,edges=None,scales=None):
-        if senses:
-            for i,s in enumerate(senses):
-                self[i].sense = s            
-        if edges:
-            for i,e in enumerate(edges):
-                self[i].edge = e
-        if scales:
-            for i,s in enumerate(scales):
-                self[i].scale = s           
-    
     
 # ----------------------------------------------------------------------
 #   Inequality Function
 # ----------------------------------------------------------------------
 
-class Inequality(Evaluator):
+class Inequality(Constraint):
     
-    Container = Inequalities
+    Container = None
     
     def __init__( self, evaluator=None, 
                   tag='cieq', sense='<', edge=0.0, 
                   scale=1.0,
                   variables=None):
-        
-        Evaluator.__init__(self)
-                
-        self.evaluator = evaluator
-        self.tag       = tag
-        self.sense     = sense
-        self.edge      = edge
-        self.scale     = scale
-        self.variables = variables
-
-    def __check__(self):
-
-        if not isinstance(self.evaluator, Evaluator):
-            self.evaluator = Evaluator(function=self.evaluator)
-            
-        if self.sense not in '><':
-            raise TypeError , 'sense must be > or <'
-        
-        if self.evaluator.gradient is None:
-            self.gradient = None
-        if self.evaluator.hessian is None:
-            self.hessian = None
+        Constraint.__init__(self,evaluator,
+                            tag,sense,edge,
+                            scale,variables)
         
     def function(self,x):
         
@@ -148,3 +75,66 @@ class Inequality(Evaluator):
 
     def __repr__(self):
         return "<Inequality '%s'>" % self.tag
+    
+
+# ----------------------------------------------------------------------
+#   Inequality Container
+# ----------------------------------------------------------------------
+
+class Inequalities(IndexableDict):
+    
+    def __init__(self,variables):
+        self.variables = variables
+    
+    def __set__(self,problem,arg_list):            
+        self.clear()
+        self.extend(arg_list)
+        
+    def append(self, evaluator, 
+               tag=None, sense='=', edge=0.0, 
+               scale=1.0 ):
+        
+        if tag is None and isinstance(evaluator,Inequality):
+            inequality = evaluator
+            inequality.variables = self.variables
+        else:
+            args = flatten_list(args) + [self.variables]
+            inequality = Inequality(evaluator,tag,sense,edge,scale,self.variables)
+        
+        inequality.__check__()
+        tag = inequality.tag
+        self[tag] = inequality
+        
+    def extend(self,arg_list):
+        for args in arg_list:
+            self.append(*args)
+                        
+    def tags(self):
+        return self.keys()
+    def senses(self):
+        return [ con.sense for con in self.values() ]
+    def edges(self):
+        return [ con.edge for con in self.values() ]
+    def scales(self):
+        return [ con.scale for con in self.values() ]
+    def evaluators(self):
+        return [ con.evaluator for con in self.values() ]
+    
+    def edges_array(self):
+        return np.vstack([ atleast_2d(x,'col') for x in self.edges() ])       
+    
+    def set(senses=None,edges=None,scales=None):
+        if senses:
+            for i,s in enumerate(senses):
+                self[i].sense = s            
+        if edges:
+            for i,e in enumerate(edges):
+                self[i].edge = e
+        if scales:
+            for i,s in enumerate(scales):
+                self[i].scale = s       
+                
+# ----------------------------------------------------------------------
+#   Inequality Container
+# ----------------------------------------------------------------------
+Inequality.Container = Inequalities

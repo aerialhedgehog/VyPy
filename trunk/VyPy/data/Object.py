@@ -9,27 +9,21 @@ class Object(object):
     # mega expensive...
     def __getattribute__(self,k):
         try:
-            return super(Object,self).__getattribute__(k).__get__(self,type(self))
+            return object.__getattribute__(self,k).__get__(self,type(self))
         except AttributeError:
-            return super(Object,self).__getattribute__(k)
-        except AttributeError:
-            raise AttributeError(k)        
+            return object.__getattribute__(self,k)
     
     def __setattr__(self,k,v):
         try:
-            super(Object,self).__getattribute__(k).__set__(self,v)
+            object.__getattribute__(self,k).__set__(self,v)
         except AttributeError:
-            super(Object,self).__setattr__(k,v)
-        except AttributeError:
-            raise AttributeError(k)
+            object.__setattr__(self,k,v)
     
     def __delattr__(self,k):
         try:
-            super(Object,self).__getattribute__(k).__del__(self)
+            object.__getattribute__(self,k).__delete__(self)
         except AttributeError:
-            super(Object,self).__delattr__(k)
-        except AttributeError:
-            raise AttributeError(k)                    
+            object.__delattr__(self,k)
           
             
 # ----------------------------------------------------------------------

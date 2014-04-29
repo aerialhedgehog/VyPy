@@ -5,12 +5,19 @@ class ScalingFunction(object):
     
     def set_scaling(self,other):
         return other
-    
     def unset_scaling(self,other):
         return other
     
+    def set_scaling_gradient(self,other):
+        raise NotImplementedError
+    def unset_scaling_gradient(self,other):
+        raise NotImplementedError
+    
     # operator overloading
     def __rmul__(self,other):
+        ## TODO
+        #if isinstance(other,Gradient):
+            #return self.set_scaling_gradient(other)
         return self.set_scaling(other)
     def __rdiv__(self,other):
         return self.unset_scaling(other)

@@ -4,41 +4,79 @@
 # ----------------------------------------------------------------------
 
 from Evaluator  import Evaluator
-from Equality   import Equality
-from Inequality import Inequality
 
-from VyPy.data import IndexableDict, Descriptor
+from VyPy.data import Object, IndexableDict, Descriptor
 from VyPy.data.input_output import flatten_list
 
+# ----------------------------------------------------------------------
+#   Constraint Function
+# ----------------------------------------------------------------------
+
+class Constraint(Evaluator):
+    
+    Container = None
+    
+    def __init__( self, evaluator=None, 
+                  tag='c', sense='=', edge=0.0, 
+                  scale=1.0,
+                  variables=None):
+        
+        Evaluator.__init__(self)
+        
+        self.evaluator = evaluator
+        self.tag       = tag
+        self.sense     = sense
+        self.edge      = edge
+        self.scale     = scale
+        self.variables = variables
+        
+
+    def __check__(self):
+
+        if not isinstance(self.evaluator, Evaluator):
+            self.evaluator = Evaluator(function=self.evaluator)
+        
+        if self.evaluator.gradient is None:
+            self.gradient = None
+        if self.evaluator.hessian is None:
+            self.hessian = None
+            
+        
+    def function(self,x):
+        raise NotImplementedError
+    
+    def gradient(self,x):
+        raise NotImplementedError
+    
+    def hessian(self,x):
+        raise NotImplementedError
+    
+    
+# ----------------------------------------------------------------------
+#   Constraint Container
+# ----------------------------------------------------------------------
+
+from Equality   import Equality, Equalities
+from Inequality import Inequality, Inequalities
 
 class_map = {
     '=' : Equality ,
     '>' : Inequality,
     '<' : Inequality,
 }
-   
-        
-# ----------------------------------------------------------------------
-#   Constraint Container
-# ----------------------------------------------------------------------
 
-class Constraints(object):
+class Constraints(Object):
     
     def __init__(self,variables):
-        self._variables    = variables
-        self._equalities   = Equality.Container(self.variables)
-        self._inequalities = Inequality.Container(self.variables)
+        self.variables    = variables
+        self.equalities   = Equalities(self.variables)
+        self.inequalities = Inequalities(self.variables)
         
         self._container_map = {
             '=' : self.equalities ,
             '>' : self.inequalities,
             '<' : self.inequalities,
-        }            
-    
-    # setup descriptors
-    variables    = Descriptor('_variables')
-    equalities   = Descriptor('_equalities')
-    inequalities = Descriptor('_inequalities')    
+        }               
     
     def __set__(self,problem,arg_list):            
         self.clear()
@@ -48,9 +86,11 @@ class Constraints(object):
         self.equalities.clear()
         self.inequalities.clear()
     
-    def append(self, evaluator, tag='c', sense='=', edge=0.0, scale=1.0 ):
+    def append(self, evaluator, 
+               tag=None, sense='=', edge=0.0, 
+               scale=1.0 ):
         
-        if isinstance(evaluator,(Equality,Inequality)):
+        if tag is None and isinstance(evaluator,Constraint):
             constraint = evaluator
             constraint.variables = self.variables
         else:
@@ -92,23 +132,7 @@ class Constraints(object):
     def __str__(self):
             return str(self.equalities) + '\n' + str(self.inequalities)
 
-
 # ----------------------------------------------------------------------
 #   Constraint Function
 # ----------------------------------------------------------------------
-
-class Constraint(Evaluator):
-    
-    Container = Constraints
-    
-    def __init__( self ):
-        pass
-        
-    def function(self,x):
-        raise NotImplementedError
-    
-    def gradient(self,x):
-        raise NotImplementedError
-    
-    def hessian(self,x):
-        raise NotImplementedError
+Constraint.Container = Constraints

@@ -3,9 +3,9 @@
 #   Imports
 # ----------------------------------------------------------------------
 
-from Variable   import Variable
-from Objective  import Objective
-from Constraint import Constraint
+from Variable   import Variable, Variables
+from Objective  import Objective, Objectives
+from Constraint import Constraint, Constraints
 from Equality   import Equality
 from Inequality import Inequality
 
@@ -16,15 +16,15 @@ from VyPy.data import IndexableDict, Object, Descriptor
 #   Problem
 # ----------------------------------------------------------------------
 
-class Problem(object):
+class Problem(Object):
     
     def __init__(self):
         
-        self._variables    = Variable.Container()
-        self._objectives   = Objective.Container(self.variables)
-        self._constraints  = Constraint.Container(self.variables)
-        self._equalities   = self.constraints.equalities
-        self._inequalities = self.constraints.inequalities
+        self.variables    = Variables()
+        self.objectives   = Objectives(self.variables)
+        self.constraints  = Constraints(self.variables)
+        self.equalities   = self.constraints.equalities
+        self.inequalities = self.constraints.inequalities
       
     def has_gradients(self):
         
@@ -41,11 +41,5 @@ class Problem(object):
         eq_grads = any(grads) and all(grads)            
            
         return obj_grads, ineq_grads, eq_grads
-  
-    # setup descriptors
-    variables    = Descriptor('_variables')
-    objectives   = Descriptor('_objectives')
-    constraints  = Descriptor('_constraints')
-    equalities   = Descriptor('_equalities')
-    inequalities = Descriptor('_inequalities')  
+
   

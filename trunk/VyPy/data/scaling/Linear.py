@@ -23,6 +23,11 @@ class Linear(ScalingFunction):
     def unset_scaling(self,other):
         return other/self.scale + self.center
     
+    def set_scaling_gradient(self,other):
+        return other*self.scale
+    def unset_scaling_gradient(self,other):
+        return other/self.scale
+    
     
 # ----------------------------------------------------------------------
 #   Module Tests

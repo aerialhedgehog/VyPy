@@ -23,7 +23,7 @@ def test_func(inputs):
     x2 = inputs['x2']
     x3 = inputs.x3
     
-    print inputs
+    #print inputs
     
     f = x1**2 + x2**2 + np.sum(x3)
     c = x1 + x2 + x3[0]
@@ -74,17 +74,15 @@ def test_1():
     con.edge      = np.array([3.,3.,3.])
     problem.constraints.append(con)
     
-    
-    problem.inequalities.keys()
-    
     driver = opt.drivers.SLSQP()
     
+    from time import time
+    t0 = time()
     result = driver.run(problem)
+    print time() - t0
     
     print result
     
-    #problem.variables.get_scaled()
-    #Evaluator.__init__()
     
 
 
