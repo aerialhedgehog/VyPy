@@ -18,16 +18,6 @@ class Bunch(Dict):
         
     """
     
-    def __new__(klass,*args,**kwarg):
-        self = Dict.__new__(klass,*args,**kwarg)
-        
-        # initialize properties
-        for k in dir(klass):
-            obj = getattr(klass,k)
-            if isinstance(obj,Property):
-                obj._key = k
-        return self
-    
     __getitem__ = Dict.__getattribute__
     __setitem__ = Dict.__setattr__
     __delitem__ = Dict.__delattr__

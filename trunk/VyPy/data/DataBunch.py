@@ -3,8 +3,8 @@
 #   Imports
 # ----------------------------------------------------------------------
 
-from IndexableBunch import IndexableBunch
-from OrderedBunch import OrderedBunch
+from IndexableBunch import IndexableBunch ## Too Slow on __getitem__
+from OrderedBunch import OrderedBunch 
 
 import types
 from copy            import deepcopy
@@ -39,8 +39,8 @@ class DataBunch(IndexableBunch):
         """
         
         # initialize data, no inputs
-        self = IndexableBunch.__new__(cls)
-        IndexableBunch.__init__(self)
+        self = super(DataBunch,cls).__new__(cls)
+        super(DataBunch,self).__init__()
         
         # get base class list
         klasses = self.get_bases()
@@ -60,7 +60,7 @@ class DataBunch(IndexableBunch):
         """
         
         # handle input data (ala class factory)
-        input_data = IndexableBunch(*args,**kwarg)
+        input_data = DataBunch.__base__(*args,**kwarg)
         
         # update this data with inputs
         self.update(input_data)
@@ -85,7 +85,7 @@ class DataBunch(IndexableBunch):
         else:
             args += ''
             
-        args += IndexableBunch.__str__(self,indent)
+        args += super(DataBunch,self).__str__(indent)
         
         return args
         

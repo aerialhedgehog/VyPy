@@ -16,8 +16,8 @@ class OrderedBunch(Bunch,OrderedDict):
     """ An ordered dictionary that provides attribute-style access.
     """
     
-    _root = Property()
-    _map  = Property()
+    _root = Property('_root')
+    _map  = Property('_map')
     
     def __new__(klass,*args,**kwarg):
 
@@ -30,8 +30,8 @@ class OrderedBunch(Bunch,OrderedDict):
         except:
             root = [] # sentinel node
             root[:] = [root, root, None]
-            self._root = root
-            self._map  = {}
+            dict.__setitem__(self,'_root',root)
+            dict.__setitem__(self,'_map' ,{})
         
         return self
 
@@ -39,10 +39,10 @@ class OrderedBunch(Bunch,OrderedDict):
         """od.__setitem__(i, y) <==> od[i]=y"""
         # Setting a new item creates a new link which goes at the end of the linked
         # list, and the inherited dictionary is updated with the new key/value pair.
-        if key not in dir(self):
-            root = self._root
+        if not hasattr(self,key) and not hasattr(self.__class__,key):
+            root = dict.__getitem__(self,'_root')
             last = root[0]
-            map  = self._map
+            map  = dict.__getitem__(self,'_map')
             last[1] = root[0] = map[key] = [last, root, key]
         Bunch.__setattr__(self,key, value)
 
