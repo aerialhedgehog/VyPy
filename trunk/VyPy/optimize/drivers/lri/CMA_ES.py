@@ -1,25 +1,26 @@
 
 from VyPy.optimize.drivers import Driver
-import numpy
+import numpy as np
 
 try:
     import cma
-    is_loaded = True
 except ImportError:
-    is_loaded = False
+    pass
     
 # ----------------------------------------------------------------------
 #   Covariance Matrix Adaptation - Evolutionary Strategy
 # ----------------------------------------------------------------------
 class CMA_ES(Driver):
-    def __init__(self,iprint=1., rho_scl = 0.10, n_eval=None):
+    def __init__(self,iprint=1, rho_scl = 0.10, n_eval=None):
         
-        if not is_loaded:
+        try:
+            import cma
+        except ImportError:
             raise ImportError, 'Could not import cma, please install from: https://www.lri.fr/~hansen/cma.py'
         
         self.iprint  = iprint
         self.rho_scl = rho_scl
-        self.n_eval  = n_eval or numpy.inf
+        self.n_eval  = n_eval or np.inf
     
     def run(self,problem):
         
@@ -30,14 +31,16 @@ class CMA_ES(Driver):
         assert len(problem.objectives) == 1 , 'too many objectives'
         
         # optimizer
+        import cma
         optimizer = cma.fmin
         
         # inputs
         func   = self.func
-        x0     = problem.variables.scaled.initials()
+        x0     = problem.variables.scaled.initials_array()
+        x0     = np.squeeze(x0)
         sigma0 = self.sigma0()
-        bounds = problem.variables.scaled.bounds()
-        bounds = map(list, zip(*bounds))
+        bounds = problem.variables.scaled.bounds_array()
+        bounds = [ bounds[:,0] , bounds[:,1] ]
         
         # run the optimizer
         result = optimizer( func      = func   ,
@@ -61,13 +64,11 @@ class CMA_ES(Driver):
 
     def func(self,x):
         
-        obj  = self.objective(x)
+        obj  = self.objective(x)[0,0]
+        cons = self.constraints(x)
         
         # penalty for constraints
-        cons = self.constraints(x)
-        cons = [c**2 for c in cons]
-        
-        result = obj + sum(cons)
+        result = obj + sum( cons**2 ) * 100000.0
         
         return result
             
@@ -90,16 +91,15 @@ class CMA_ES(Driver):
             res = equality.function(x)
             result.append(res)
             
+        if result:
+            result = np.vstack(result)
+            result = np.squeeze(result)
+            
         return result
     
     def sigma0(self):
-        bounds = self.problem.variables.scaled.bounds()
-        sig0 = []
-        for b in bounds:
-            lo,hi = b
-            s = (hi-lo)*self.rho_scl
-            sig0.append(s)
-        sig0 = sum(sig0)/len(sig0)
+        bounds = self.problem.variables.scaled.bounds_array()
+        sig0 = np.mean( np.diff(bounds) ) * self.rho_scl
         return sig0
         
 

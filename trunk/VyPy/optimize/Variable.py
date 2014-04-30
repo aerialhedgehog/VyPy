@@ -7,9 +7,14 @@ import os, shutil, sys, copy
 import numpy as np
 
 from VyPy.tools.arrays import array_type, matrix_type, atleast_2d
+
 from VyPy.data import OrderedDict, OrderedBunch
 odict  = OrderedDict
 obunch = OrderedBunch
+
+from VyPy.data import IndexableDict, IndexableBunch
+idict  = IndexableDict
+ibunch = IndexableBunch
 
 iterable_type = (list,tuple,array_type,matrix_type)
 
@@ -59,7 +64,7 @@ class ScaledVariable(object):
 #   Variables Container
 # ----------------------------------------------------------------------
 
-class Variables(OrderedDict):
+class Variables(IndexableDict):
     
     def __init__(self):
         self.scaled = ScaledVariables(self)
@@ -103,7 +108,7 @@ class Variables(OrderedDict):
         """
         
         values = np.squeeze(values)
-        variables = obunch(zip(self.keys(),self.initials()))
+        variables = ibunch(zip(self.keys(),self.initials()))
         variables.unpack_array(values)
         
         return variables

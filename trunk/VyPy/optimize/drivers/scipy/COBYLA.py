@@ -1,5 +1,13 @@
 
 from VyPy.optimize.drivers import Driver
+from VyPy.parallel import Remember
+import numpy as np
+
+try:
+    import scipy
+    import scipy.optimize  
+except ImportError:
+    pass
 
 # ----------------------------------------------------------------------
 #   Constrained Optimization BY Linear Approximation
@@ -12,6 +20,9 @@ class COBYLA(Driver):
         self.iprint = iprint
         self.n_eval = int(n_eval)
         self.rho_scl = rho_scl
+        
+        # this cache is a special requirement for scipy's COBYLA
+        self._cache = {'x':None, 'c':None}
     
     def run(self,problem):
         
@@ -27,8 +38,8 @@ class COBYLA(Driver):
         
         # inputs
         func   = self.func
-        x0     = self.problem.variables.scaled.initials()
-        cons   = self.cons()
+        x0     = self.problem.variables.scaled.initials_array()
+        cons   = self.setup_cons()
         rhobeg = self.rhobeg()
         rhoend = [ r*0.0001 for r in rhobeg ]
         iprint = self.iprint
@@ -54,24 +65,57 @@ class COBYLA(Driver):
     def func(self,x):
         objective = self.problem.objectives[0]
         result = objective.function(x)
-        return result        
+        result = np.squeeze(result)
+        return result
+    
+    def cons(self,x):
+        # check cache
+        if np.all( self._cache['x'] == x ):
+            return self._cache['c']
+            
+        # otherwise...
         
-    def cons(self):        
         equalities   = self.problem.equalities
         inequalities = self.problem.inequalities
         
-        cons = []
-        for equality in inequalities:
-            func = lambda (x): -equality.function(x)
-            cons.append(func)
-        for inequality in equalities:
-            # build equality constraint with two inequality constraints
-            func = inequality.function
-            cons.append(func)
-            func = lambda (x): -inequality.function(x)
-            cons.append(func)
+        result = []
+        
+        for inequality in inequalities:
+            res = -inequality.function(x)
+            result.append(res)
             
-        return cons
+        for equality in equalities:
+            # build equality constraint with two inequality constraints
+            res = equality.function(x)
+            result.append(res)
+            result.append(-res)
+            
+        # todo - design space bounds
+            
+        if result:
+            result = np.vstack(result)
+            result = np.squeeze(result)
+            
+        print result
+            
+        # store to cache
+        self._cache['x'] = x + 0 
+        self._cache['c'] = result + 0
+            
+        return result
+            
+        
+    def setup_cons(self):        
+        
+        # find out number of constraints
+        x0 = self.problem.variables.scaled.initials_array()[:,0]
+        c0 = self.cons(x0)
+        n_c0 = len(c0)
+        
+        # build a list of constraint function handles
+        result = [ _Constraint( self.cons, i ) for i in range(n_c0) ]
+        
+        return result
     
     def rhobeg(self):
         bounds = self.problem.variables.scaled.bounds()
@@ -83,4 +127,9 @@ class COBYLA(Driver):
         return rho
     
     
-    
+class _Constraint(object):
+    def __init__(self,con,i):
+        self.con = con
+        self.i   = i
+    def __call__(self,x):
+        return self.con(x)[self.i]

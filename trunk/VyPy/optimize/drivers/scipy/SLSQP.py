@@ -1,7 +1,12 @@
 
 from VyPy.optimize.drivers import Driver
-from VyPy.tools.arrays import squeeze_jagged_array, squeeze_jagged_vector
 import numpy as np
+
+try:
+    import scipy
+    import scipy.optimize  
+except ImportError:
+    pass
 
 # ----------------------------------------------------------------------
 #   Sequential Least Squares Quadratic Programming
@@ -9,10 +14,7 @@ import numpy as np
 class SLSQP(Driver):
     def __init__(self,iprint=1):
         
-        from warnings import simplefilter
-        simplefilter('ignore',RuntimeWarning)
-        
-        import scipy.optimize        
+        import scipy.optimize  
         
         self.iprint = iprint
     

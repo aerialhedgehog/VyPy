@@ -1,5 +1,12 @@
 
 from VyPy.optimize.drivers import Driver
+import numpy as np
+
+try:
+    import scipy
+    import scipy.optimize  
+except ImportError:
+    pass
 
 # ----------------------------------------------------------------------
 #   Broyden-Fletcher-Goldfarb-Shanno Algorithm
@@ -27,25 +34,27 @@ class BFGS(Driver):
         # inputs
         func   = self.func
         fprime = None
-        x0     = problem.variables.scaled.initial
+        x0     = problem.variables.scaled.initials_array()
         
         # run the optimizer
-        result = optimizer( f       = func   ,
-                            x0      = x0     ,
-                            fprime  = fprime ,
-                            maxiter = self.n_eval )
+        x_min = optimizer( f       = func   ,
+                           x0      = x0     ,
+                           fprime  = fprime ,
+                           maxiter = self.n_eval )
+        
+        x_min = self.problem.variables.scaled.unpack_array(x_min)
+        f_min = self.problem.objectives[0].evaluator.function(x_min)        
+        
         # done!
-        return result
+        return f_min, x_min, None
 
     def func(self,x):
         
-        obj  = self.objective(x)
+        obj = self.objective(x)[0,0]
+        cons = self.constraints(x)
         
         # penalty for constraints
-        cons = self.constraints(x)
-        cons = [c**2 for c in cons]
-        
-        result = obj + sum(cons)
+        result = obj + sum( cons**2 ) * 100000.0
         
         return result
             
@@ -62,11 +71,15 @@ class BFGS(Driver):
         
         for inequality in inequalities:
             res = inequality.function(x)
-            if res < 0.0: res = 0.0
+            res[res<0.0] = 0.0
             result.append(res)
         for equality in equalities:
             res = equality.function(x)
             result.append(res)
+            
+        if result:
+            result = np.vstack(result)
+            result = np.squeeze(result)
             
         return result
     

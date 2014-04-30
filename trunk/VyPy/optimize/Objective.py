@@ -6,7 +6,7 @@
 from Evaluator import Evaluator
 
 from VyPy.data import IndexableDict
-
+from VyPy.tools.arrays import atleast_2d_col, atleast_2d_row
     
 # ----------------------------------------------------------------------
 #   Objective Function
@@ -48,6 +48,8 @@ class Objective(Evaluator):
         
         result = result * scl
         
+        result = atleast_2d_col(result)
+        
         return result
     
     def gradient(self,x):
@@ -61,6 +63,8 @@ class Objective(Evaluator):
         result = func(x)[tag]
         
         result = result * scl ## !!! PROBLEM WHEN SCL is NOT CENTERED
+        
+        result = atleast_2d_row(result)
         
         return result
     

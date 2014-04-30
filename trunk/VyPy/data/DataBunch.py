@@ -3,8 +3,8 @@
 #   Imports
 # ----------------------------------------------------------------------
 
-from IndexableBunch import IndexableBunch ## Too Slow on __getitem__
-from OrderedBunch import OrderedBunch 
+from IndexableBunch import IndexableBunch 
+#from OrderedBunch import OrderedBunch 
 
 import types
 from copy            import deepcopy

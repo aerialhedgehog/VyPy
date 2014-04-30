@@ -4,7 +4,7 @@ from VyPy.data import save as save_data
 from VyPy.data import HashedDict, make_hashable
 
 import os, sys, time
-
+from copy import deepcopy
 
 # ----------------------------------------------------------------------
 #   Remember
@@ -40,18 +40,18 @@ class Remember(object):
                 
         # check cache
         if self.__cache__.has_key(_inputs): 
-            print 'PULLED FROM CACHE'
-            outputs = self.__cache__[_inputs]
+            #print 'PULLED FROM CACHE'
+            outputs = deepcopy( self.__cache__[_inputs] )
         
         # evalute function
         else:
             outputs = self.__func__(inputs)
-            self.__cache__[_inputs] = outputs
+            self.__cache__[_inputs] = deepcopy(outputs)
         
         #: if cached
         
         # save cache
-        if self.filename and len(self.__cache__)%self.write_freq == 0:
+        if self.filename and ( len(self.__cache__) % self.write_freq ) == 0:
             self.save_cache()
         
         # done
