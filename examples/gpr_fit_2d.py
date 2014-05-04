@@ -61,31 +61,34 @@ def main():
     # Build a gpr modeling object and train it with data
     
     # start a training data object
-    Train = gpr.Training(XB,XS,FS,DFS)
+    Train = gpr.training.Training(XB,XS,FS,DFS)
     ## Train = gpr.Training(XB,XS,FS) # no gradients, try for lower model accuracy
     
     # find scaling factors for normalizing data
-    Scaling = gpr.Scaling.Training(Train)
+    Scaling = gpr.scaling.Linear(Train)
     
     # scale the training data
-    Train = Scaling.set_scaling(Train)
+    Train_Scl = Scaling.set_scaling(Train)
     # In this case the scaling is performed by normalizing on 
     # the experimental range ( max()-min() ) for input feature
     # samples XS (by dimension) and output target samples FS.
     
     # choose a kernel 
-    Kernel = gpr.Kernel.Gaussian(Train)
+    Kernel = gpr.kernel.Gaussian(Train_Scl)
     
     # choose an inference model (only one for now)
-    Infer  = gpr.Inference(Kernel)
+    Infer  = gpr.inference.Gaussian(Kernel)
     
     # choose a learning model (only one for now)
-    Learn  = gpr.Learning(Infer)
+    Learn  = gpr.learning.Likelihood(Infer)
     
     # start a gpr modling object
-    Model  = gpr.Modeling(Learn)
+    Model  = gpr.modeling.Regression(Learn)  
     # This object holds all the model's assumptions and 
     # data, in order to expose a simple interface.
+    # Optionally, the Scaling data can be provided to
+    # allow this object to accept and return dimensional data:
+    #   Model = gpr.modeling.Regression(Learn,Scaling) 
     
     # learn on the training data
     Model.learn()
@@ -120,17 +123,17 @@ def main():
             it = it+1
     
     # scale feature locations to match the model
-    XI_scl = Scaling.set_scaling(XI,'X')
+    XI_scl = XI / Scaling.XI
     
     # ---------------------------------------------------------    
     # evaluate the model with the scaled features
-    The_Data = Model.predict(XI_scl)
+    The_Data_Scl = Model.predict(XI_scl)
     # since we constructed a model with scaled training data,
     # we must provide scaled feature locations to predict    
     # ---------------------------------------------------------    
 
     # un-scale the estimated targets
-    The_Data = Scaling.unset_scaling(The_Data)
+    The_Data = Scaling.unset_scaling(The_Data_Scl)
     
     # pull the estimated target function values
     FI = The_Data.YI
@@ -156,12 +159,12 @@ def main():
     print 'Estimate Modeling Errors ...'
     
     # scale data - training samples
-    FS_scl = Scaling.set_scaling(FS,'Y')
-    FST_scl = Scaling.set_scaling(FST,'Y')
+    FS_scl  = Scaling.Y.set_scaling(FS)
+    FST_scl = FST / Scaling.Y # alternate syntax
     
     # scale data - grid testing samples
-    FI_scl = Scaling.set_scaling(FI,'Y')
-    FT_scl = Scaling.set_scaling(FT,'Y')
+    FI_scl = FI / Scaling.Y
+    FT_scl = FT / Scaling.Y
     
     # rms errors
     ES_rms = np.sqrt( np.mean( (FS_scl-FST_scl)**2 ) )

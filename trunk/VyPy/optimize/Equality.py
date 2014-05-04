@@ -37,7 +37,7 @@ class Equality(Constraint):
         val  = self.edge
         scl  = self.scale
         
-        result = func(x)[tag]*scl - val*scl
+        result = func(x)[tag]/scl - val/scl
         
         result = atleast_2d(result,'col')
         
@@ -53,7 +53,7 @@ class Equality(Constraint):
         
         result = func(x)[tag]
         
-        result = result * scl ## !!! PROBLEM WHEN SCL is NOT CENTERED
+        result = result / scl ## !!! PROBLEM WHEN SCL is NOT CENTERED
         
         result = atleast_2d(result,'row')
         

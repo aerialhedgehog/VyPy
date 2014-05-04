@@ -96,8 +96,6 @@ class COBYLA(Driver):
             result = np.vstack(result)
             result = np.squeeze(result)
             
-        print result
-            
         # store to cache
         self._cache['x'] = x + 0 
         self._cache['c'] = result + 0

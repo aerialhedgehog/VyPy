@@ -5,27 +5,20 @@ import numpy as np
 import scipy as sp
 import scipy.linalg
 
+from Modeling import Modeling
+
 from VyPy.exceptions import EvaluationFailure
 from VyPy.data import IndexableDict
 from VyPy.tools import vector_distance, atleast_2d
 
-class Modeling(object):
+class Regression(Modeling):
     
     def __init__(self,Learn,Scaling=None):
         
-        # pack
-        self.Learn   = Learn
-        self.Infer   = Learn.Infer
-        self.Kernel  = Learn.Kernel
-        self.Train   = Learn.Train
-        self.Hypers  = Learn.Hypers
-        self.Scaling = Scaling
-        
-        # useful data
-        self.RIE = {}
-        self._current = False
+        Modeling.__init__(self,Learn,Scaling)
         
         # reinterpolated model
+        self.RIE = {}
         self.RI = None
         
         # try to precalc Kernel
@@ -34,26 +27,7 @@ class Modeling(object):
         return
     
     #: def __init__()
-    
-    @staticmethod
-    def Gaussian(XB,X,Y,DY=None,learn=True,**hypers):
-        
-        from VyPy.regression import gpr
-        
-        Train = gpr.Training(XB,X,Y,DY)
-        
-        Scaling = gpr.Scaling.Training(Train)
-        Train = Scaling.set_scaling(Train)
-        
-        Kernel = gpr.Kernel.Gaussian(Train,**hypers)
-        Infer  = gpr.Inference(Kernel)
-        Learn  = gpr.Learning(Infer)
-        Model  = gpr.Modeling(Learn,Scaling)
-        
-        if learn:
-            Model.learn()
-        
-        return Model
+
     
     def predict(self,XI):
         

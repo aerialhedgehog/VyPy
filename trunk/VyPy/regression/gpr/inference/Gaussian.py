@@ -2,23 +2,14 @@
 import numpy as np
 import scipy as sp
 
+from Inference import Inference
+
 from VyPy import tools
 from VyPy.exceptions import EvaluationFailure
 from VyPy.tools import atleast_2d
 
-class Inference(object):
+class Gaussian(Inference):
     
-    def __init__(self,Kernel):
-        
-        self.Kernel = Kernel
-        self.Train  = Kernel.Train
-        
-        return
-    
-    def __call__(self,XI):
-        return self.evaluate(XI)
-    
-
     def precalc(self):
         ''' precalculate cholesky decomposition of K1
         '''

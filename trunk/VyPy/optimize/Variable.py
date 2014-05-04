@@ -52,8 +52,8 @@ class ScaledVariable(object):
                   bounds=(1.e-100,1.e+100), scale=1.0 ):
         
         self.tag     = tag
-        self.initial = initial*scale
-        self.bounds  = tuple([ b*scale for b in bounds ])
+        self.initial = initial/scale
+        self.bounds  = tuple([ b/scale for b in bounds ])
         self.scale   = scale
     
     def __repr__(self):
@@ -148,7 +148,7 @@ class Variables(IndexableDict):
         if initials:
             for i,(v,s) in enumerate(zip(initials,self.scales())):
                 self[i].initial = v
-                self.scaled[i].initial = v*s
+                self.scaled[i].initial = v/s
         if scales:
             for i,s in enumerate(scales):
                 self[i].scale = s
@@ -156,7 +156,7 @@ class Variables(IndexableDict):
         if bounds:
             for i,(bnd,s) in enumerate(zip(bounds,self.scales())):
                 self[i].bounds = b
-                self[i].scaled.bounds = [ v*s for v in b ]
+                self[i].scaled.bounds = [ v/s for v in b ]
     
 
 # ----------------------------------------------------------------------
@@ -170,23 +170,23 @@ class ScaledVariables(Variables):
      
     def unpack_array(self,values):
         """ vars = Variables.unpack_array(vals)
-            unpack_array a list of values into an ordered dictionary 
-            of variables
+            unpack_array an array of scaled values into
+            an ordered dictionary of unscaled variables
         """
         scales = self.scales()
         variables = Variables.unpack_array(self,values)
         for k,s in zip (variables.keys(),scales):
-            variables[k] = variables[k] / s
+            variables[k] = variables[k] * s
         return variables
     
     def pack_array(self,variables):
         """ values = Variables.pack_array(vars)
-            pack an ordered dictionary of variables into
-            a list of values
+            pack an ordered dictionary of unscaled variables into
+            an array of scaled values
         """
         scales = self.scales()
         for k,s in zip (variables.keys(),scales):
-            variables[k] = variables[k] * s
+            variables[k] = variables[k] / s
         values = Variables.pack_array(self,variables)
         return values
     
@@ -204,11 +204,11 @@ class ScaledVariables(Variables):
         if initials:
             for i,(v,s) in enumerate(zip(initials,self.scales)):
                 self[i].initial = v
-                self.unscaled[i].initial = v/s
+                self.unscaled[i].initial = v*s
         if bounds:
             for i,(bnd,s) in enumerate(zip(bounds,self.scales)):
                 self[i].bounds = bnd
-                self[i].unscaled.bounds = [ v/s for v in bnd ]
+                self[i].unscaled.bounds = [ v*s for v in bnd ]
         if scales:
             for i,s in enumerate(scales):
                 self[i].scale = s

@@ -38,9 +38,9 @@ class Inequality(Constraint):
         scl  = self.scale
         
         if snz == '>':
-            result = val*scl - func(x)[tag]*scl
+            result = val/scl - func(x)[tag]/scl
         elif snz == '<':
-            result = func(x)[tag]*scl - val*scl
+            result = func(x)[tag]/scl - val/scl
         else:
             raise Exception, 'unrecognized sense %s' % snz        
         
@@ -64,7 +64,7 @@ class Inequality(Constraint):
         else:
             raise Exception, 'unrecognized sense %s' % snz        
         
-        result = result * scl
+        result = result / scl
         
         result = atleast_2d(result,'row')
         

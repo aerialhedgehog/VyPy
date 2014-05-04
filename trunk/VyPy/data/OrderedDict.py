@@ -40,8 +40,8 @@ class OrderedDict(Dict):
 
         self = super(OrderedDict,klass).__new__(klass)
         
-        if len(args) > 1:
-            raise TypeError('expected at most 1 arguments, got %d' % len(args))
+        #if len(args) > 1:
+            #raise TypeError('expected at most 1 arguments, got %d' % len(args))
         if self.__root is None:
             root = [] # sentinel node
             root[:] = [root, root, None]

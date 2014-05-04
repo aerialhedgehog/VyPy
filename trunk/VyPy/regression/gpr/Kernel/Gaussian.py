@@ -4,6 +4,7 @@ import scipy as sp
 from Kernel import Kernel
 from VyPy.data import IndexableBunch
 from VyPy.tools import atleast_2d, vector_distance
+from VyPy.exceptions import EvaluationFailure
 
 class Gaussian(Kernel):
     ''' Gaussian Covariance Matrix with Derivatives 
@@ -14,6 +15,7 @@ class Gaussian(Kernel):
     def __init__(self,Train,**hypers):
         
         super(Gaussian,self).__init__(Train,**hypers)
+        
         if hypers.has_key('probNze'):
             self.Hypers['sig_ny']  = hypers['probNze']
             self.Hypers['sig_ndy'] = hypers['probNze']
@@ -146,8 +148,6 @@ class Gaussian(Kernel):
             
         return K
     
-    #: def evaluate()
-    
     def K1(self):
         """ Kernel.K1(Train=None)
             first covariance block - training to training
@@ -251,97 +251,100 @@ class Gaussian(Kernel):
         
         return The_Data
             
-    #: def pack_outputs()         
-    
+
+    def setup_learning(self,problem):
         
-#: class Gaussian()
+        Train  = self.Train
+        Hypers = self.Hypers
         
-    
-    #def setup_learning(self,problem):
+        # variables and bound constraints
+        X  = Train.X
+        Y  = Train.Y
+        DY = Train.DY     
         
-        #Hypers = self.Hypers
-        #Train  = self.Train
+        # noise constraints
+        probNze = Hypers['probNze']
+        bndNze  = 2.0
         
-        ## variables and bound constraints
-        #X  = Train.X
-        #Y  = Train.Y
-        #DY = Train.DY     
+        # feature and target ranges
+        DX_min,DX_max,_ = vector_distance(X);
+        DY_min,DY_max,_ = vector_distance(Y);
         
-        ## noise constraints
-        #probNze = Hypers['probNze']
-        #bndNze  = 2.0
+        if DX_min < 1e-10: DX_min = 1e-3;
+        if DY_min < 1e-10: DY_min = 1e-3;
         
-        ## feature and target ranges
-        #DX_min,DX_max,_ = vector_distance(X);
-        #DY_min,DY_max,_ = vector_distance(Y);
-        #sig_lo = np.log10(DY_min)-2.
-        #sig_hi = np.log10(DY_max)+2.
-        #len_lo = np.log10(DX_min)-2.
-        #len_hi = np.log10(DX_max)+1.
+        sig_lo = np.log10(DY_min)-2.
+        sig_hi = np.log10(DY_max)+2.
+        len_lo = np.log10(DX_min)-2.
+        len_hi = np.log10(DX_max)+1.
         
-        ## noise ranges
+        # noise ranges
         #nze_lo = max([ probNze-bndNze , -10.  ])
-        #nze_hi = min([ probNze+bndNze , -0.01 ])
+        #nze_hi = max([ probNze+bndNze , -0.01 ])
+        nze_lo = probNze-bndNze
+        nze_hi = probNze+bndNze
         
-        ## some noise limits
-        #max_noise_ratio = -1.0
-        #min_noise_ratio = -8.0
-        #Kcond_limit     = -12.0         
+        # some noise limits
+        max_noise_ratio = -1.0
+        min_noise_ratio = -8.0
+        Kcond_limit     = -12.0         
         
-        ## set variables and bound constraints
-        #problem.variables = [
-        ##   ['Name'    , (lb    , x0              , ub   ), scl ] ,
-            #['sig_f'   , (sig_lo,Hypers['sig_f']  ,sig_hi), 1.0 ] ,
-            #['len_s'   , (len_lo,Hypers['len_s']  ,len_hi), 1.0 ] ,
-            #['sig_ny'  , (nze_lo,Hypers['sig_ny'] ,nze_hi), 1.0 ] ,
-            #['sig_ndy' , (nze_lo,Hypers['sig_ndy'],nze_hi), 1.0 ] ,
-        #]        
+        # set variables and bound constraints
+        problem.variables = [
+        #   ['tag'     , x0               , (lb,ub)        , scl ] ,
+            ['sig_f'   , Hypers['sig_f']  , (sig_lo,sig_hi), 1.0 ] ,
+            ['len_s'   , Hypers['len_s']  , (len_lo,len_hi), 1.0 ] ,
+            ['sig_ny'  , Hypers['sig_ny'] , (nze_lo,nze_hi), 1.0 ] ,
+            ['sig_ndy' , Hypers['sig_ndy'], (nze_lo,nze_hi), 1.0 ] ,
+        ]
         
-        #problem.constraints = [
-        ##   [ function_handle     , ('output'    ,'><=',  val), scl] ,
-            #[ self.likelihood_cons , ('nze_rat_y' ,'<', max_noise_ratio), 1. ] ,
-            #[ self.likelihood_cons , ('nze_rat_y' ,'>', min_noise_ratio), 1. ] ,
-            #[ self.likelihood_cons , ('nze_rat_dy','<', max_noise_ratio), 1. ] ,
-            #[ self.likelihood_cons , ('nze_rat_dy','>', min_noise_ratio), 1. ] ,
-            #[ self.likelihood_cons , ('rel_nze'   ,'<', 0.0            ), 1. ] ,
-            #[ self.likelihood_cons , ('nze_dev'   ,'<', 0.0            ), 1. ] ,
-            ##[ self.likelihood_cons , ('k_cond'    ,'>', Kcond_limit    ), 1. ] ,
-        #]
+        problem.constraints = [
+        #   [ function_handle     , ('output'    ,'><=',  val), scl] ,
+            [ self.learning_cons , ('nze_rat_y' ,'<', max_noise_ratio), 1. ] ,
+            [ self.learning_cons , ('nze_rat_y' ,'>', min_noise_ratio), 1. ] ,
+            [ self.learning_cons , ('nze_rat_dy','<', max_noise_ratio), 1. ] ,
+            [ self.learning_cons , ('nze_rat_dy','>', min_noise_ratio), 1. ] ,
+            [ self.learning_cons , ('rel_nze'   ,'<', 0.0            ), 1. ] ,
+            [ self.learning_cons , ('nze_dev'   ,'<', 0.0            ), 1. ] ,
+            #[ self.likelihood_cons , ('k_cond'    ,'>', Kcond_limit    ), 1. ] ,
+        ]
                 
-        #return 
+        return problem
 
-    #def likelihood(self,Hyp_vec):
-        #raise NotImplementedError
-
-    #def likelihood_cons(self,Hyp_dict):
+    def learning_cons(self,hypers_dict):
+        try:
+            # unpack
+            Hypers = self.Hypers 
+            
+            # unpack hypers
+            Hypers.update(hypers_dict)
+            sig_f   = Hypers['sig_f']
+            len_s   = Hypers['len_s']
+            sig_ny  = Hypers['sig_ny']
+            sig_ndy = Hypers['sig_ndy']
+            
+            # noise ratios
+            noise_ratio_y   = sig_ny  - sig_f
+            noise_ratio_dy  = sig_ndy - (sig_f-len_s)
+            
+            # kernel condition
+            #Kcond = self.Kcond # expensive...
+            
+        # - successfull ouputs -------
+            # the constraints
+            constraints = {
+                'nze_rat_y'  : noise_ratio_y        , 
+                'nze_rat_dy' : noise_ratio_dy       ,    
+                'rel_nze'    : sig_ny  - sig_ndy    ,  
+                'nze_dev'    : sig_ndy - sig_ny - 1 ,  
+                #'k_cond'     : np.log10(Kcond)     , # expensive
+            }
+            
+        # - failed ouputs -------
+        except EvaluationFailure:
+            raise
         
-        ## unpack
-        #Hypers = self.Hypers       
-
-        ## unpack hypers
-        #Hypers.update(Hyp_dict)
-        #sig_f   = Hypers.sig_f
-        #len_s   = Hypers.len_s
-        #sig_ny  = Hypers.sig_ny
-        #sig_ndy = Hypers.sig_ndy   
-        
-        ## noise ratios
-        #noise_ratio_y   = sig_ny  - sig_f
-        #noise_ratio_dy  = sig_ndy - (sig_f-len_s)
-        
-        ## kernel condition
-        ##Kcond = self.Kcond # expensive...
-        
-        ## the constraints
-        #constraints = {
-            #'nze_rat_y'  : noise_ratio_y        , 
-            #'nze_rat_dy' : noise_ratio_dy       ,    
-            #'rel_nze'    : sig_ny - sig_ndy    ,  
-            #'nze_dev'    : sig_ndy- sig_ny - 1 ,  
-            ##'k_cond'     : np.log10(Kcond)     , # expensive
-        #}
-        
-        #return constraints
+        return constraints
     
-    ##: def likelihood_cons()
+
     

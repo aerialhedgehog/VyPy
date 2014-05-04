@@ -134,17 +134,17 @@ def fit_ND():
     # ---------------------------------------------------------
     
     # Training
-    Train = gpr.Training(XB,X,Y,DY=None)
+    Train = gpr.training.Training(XB,X,Y,DY=None)
     
     # Scaling
-    Scaling = gpr.Scaling.Training(Train)
+    Scaling = gpr.scaling.Linear(Train)
     Train = Scaling.set_scaling(Train)
     
     # Learning
-    Kernel = gpr.Kernel.Gaussian(Train)
-    Infer  = gpr.Inference(Kernel)
-    Learn  = gpr.Learning(Infer)
-    Model  = gpr.Modeling(Learn)
+    Kernel = gpr.kernel.Gaussian(Train)
+    Infer  = gpr.inference.Gaussian(Kernel)
+    Learn  = gpr.learning.Likelihood(Infer)
+    Model  = gpr.modeling.Regression(Learn)
     Model.learn()
     
     
