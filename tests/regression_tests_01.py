@@ -154,9 +154,9 @@ def fit_ND():
     
     # functions to plot, in scaled space
     f1 = lambda(Z): Model.predict(Z).YI                               
-    f2 = lambda(Z): Scaling.Y_set( The_Func( Scaling.X_unset(Z) )[0] ) 
+    f2 = lambda(Z): Scaling.Y.set_scaling( The_Func( Scaling.X.unset_scaling(Z) )[0] ) 
     # center point, scaled space
-    x0 = Scaling.X_set( [1.0] * ND )
+    x0 = Scaling.X.set_scaling( [1.0] * ND )
     # plot bounds, scaled space
     xb = Train.XB
     
