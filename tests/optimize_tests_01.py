@@ -77,10 +77,10 @@ def test_1():
     con.edge      = np.array([3.,3.,3.])
     problem.constraints.append(con)
     
-    driver = opt.drivers.SLSQP()
+    #driver = opt.drivers.SLSQP()
     #driver = opt.drivers.BFGS(n_eval=10000)   # doesnt respect design space bounds
     #driver = opt.drivers.COBYLA(n_eval=10000) # doesnt respect design space bounds
-    #driver = opt.drivers.CMA_ES(0)
+    driver = opt.drivers.CMA_ES(0)
     
     from time import time
     t0 = time()

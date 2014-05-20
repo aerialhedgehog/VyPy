@@ -16,7 +16,7 @@ class CMA_ES(Driver):
         try:
             import cma
         except ImportError:
-            raise ImportError, 'Could not import cma, please install from: https://www.lri.fr/~hansen/cma.py'
+            raise ImportError, 'Could not import cma, please install with pip: "> pip install cma"'
         
         self.iprint  = iprint
         self.rho_scl = rho_scl
@@ -42,15 +42,21 @@ class CMA_ES(Driver):
         bounds = problem.variables.scaled.bounds_array()
         bounds = [ bounds[:,0] , bounds[:,1] ]
         
+        options = {
+            'bounds'    : bounds      ,
+            'verb_disp' : self.iprint ,
+            'verb_log'  : 0           ,
+            'verb_time' : 0           ,
+            'maxfevals' : self.n_eval ,
+        }
+        
         # run the optimizer
-        result = optimizer( func      = func   ,
-                            x0        = x0     ,
-                            sigma0    = sigma0 ,
-                            bounds    = bounds ,
-                            verb_disp = self.iprint ,
-                            verb_log  = 0      ,
-                            verb_time = 0      ,
-                            maxfevals = self.n_eval )
+        result = optimizer( 
+            objective_function = func    ,
+            x0                 = x0      ,
+            sigma0             = sigma0  ,
+            options            = options ,
+        )
         
         
         x_min = result[0].tolist()

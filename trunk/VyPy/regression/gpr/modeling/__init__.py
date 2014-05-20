@@ -1,2 +1,3 @@
 
-from Modeling import Modeling as Regression
+from Modeling import Modeling
+from Regression import Regression

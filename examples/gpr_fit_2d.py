@@ -205,7 +205,7 @@ def main():
     #truh = ax.plot_surface(xi,yi,ft, cmap=cm.autumn, rstride=1,cstride=1, linewidth=0, antialiased=False)
     
     # show the plot
-    plt.show()
+    plt.show(block=True)
     
     
     # Done!

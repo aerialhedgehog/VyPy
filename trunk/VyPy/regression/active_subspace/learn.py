@@ -46,7 +46,7 @@ def gradient(DY,k=None):
         C += np.dot(dy.T,dy)
     C = C/m
     
-    # eigen value problem, find principle directions
+    # eigenvalue problem, find principle directions
     [d,V] = np.linalg.eig(C)
     
     # sort directions

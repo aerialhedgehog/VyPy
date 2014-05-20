@@ -35,7 +35,7 @@ class Modeling(object):
     def predict(self,XI):
         
         if not self.Scaling is None:
-            XI = self.Scaling.set_scaling(XI,'X')
+            XI = self.Scaling.X.set_scaling(XI)
             
         # will skip if current
         self.safe_precalc()

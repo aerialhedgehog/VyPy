@@ -170,7 +170,8 @@ def fit_ND():
     ax.legend()
     ax.set_zlabel('Y (scaled)')
     
-    plt.draw(); plt.show()
+    plt.draw(); 
+    plt.show(block=True)
     
 #: def fit_ND()
 

@@ -1,12 +1,11 @@
 
 from VyPy.regression import gpr
 
-
 def Gaussian(XB,X,Y,DY=None,learn=True,**hypers):
     """ class factory for a Gaussian Model
     """
     
-    Train = gpr.Training(XB,X,Y,DY)
+    Train = gpr.training.Training(XB,X,Y,DY)
     
     Scaling = gpr.scaling.Linear(Train)
     Train = Scaling.set_scaling(Train)
