@@ -270,8 +270,8 @@ class Gaussian(Kernel):
         DX_min,DX_max,_ = vector_distance(X);
         DY_min,DY_max,_ = vector_distance(Y);
         
-        if DX_min < 1e-10: DX_min = 1e-3;
-        if DY_min < 1e-10: DY_min = 1e-3;
+        if DX_min < 1e-6: DX_min = 1e-6;
+        if DY_min < 1e-6: DY_min = 1e-6;
         
         sig_lo = np.log10(DY_min)-2.
         sig_hi = np.log10(DY_max)+2.
