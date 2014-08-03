@@ -207,7 +207,6 @@ def main():
     # show the plot
     plt.show(block=True)
     
-    
     # Done!
     return
     

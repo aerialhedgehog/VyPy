@@ -11,7 +11,7 @@ except ImportError:
 #   Covariance Matrix Adaptation - Evolutionary Strategy
 # ----------------------------------------------------------------------
 class CMA_ES(Driver):
-    def __init__(self,iprint=1, rho_scl = 0.10, n_eval=None):
+    def __init__(self, iprint=1, rho_scl = 0.10, n_eval=None):
         
         try:
             import cma
@@ -74,7 +74,10 @@ class CMA_ES(Driver):
         cons = self.constraints(x)
         
         # penalty for constraints
-        result = obj + sum( cons**2 ) * 100000.0
+        if len(cons):
+            result = obj + np.sum( cons**2 ) * 100000.0
+        else:
+            result = obj
         
         return result
             
@@ -99,7 +102,6 @@ class CMA_ES(Driver):
             
         if result:
             result = np.vstack(result)
-            result = np.squeeze(result)
             
         return result
     

@@ -1,6 +1,7 @@
 
 from Problem    import Problem
 from Objective  import Objective
+from Constraint import Constraint
 from Equality   import Equality
 from Inequality import Inequality
 from Variable   import Variable

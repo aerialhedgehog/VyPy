@@ -5,8 +5,10 @@
 
 from Evaluator  import Evaluator
 
+import VyPy
 from VyPy.data import Object, IndexableDict, Descriptor
 from VyPy.data.input_output import flatten_list
+from VyPy.tools import atleast_2d_col, atleast_2d_row
 
 # ----------------------------------------------------------------------
 #   Constraint Function
@@ -33,13 +35,20 @@ class Constraint(Evaluator):
 
     def __check__(self):
 
+        # evaluator class
         if not isinstance(self.evaluator, Evaluator):
             self.evaluator = Evaluator(function=self.evaluator)
         
+        # gradients and hessians
         if self.evaluator.gradient is None:
             self.gradient = None
         if self.evaluator.hessian is None:
             self.hessian = None
+            
+        # arrays
+        self.edge = atleast_2d_col(self.edge)
+        if not isinstance(self.scale,VyPy.data.scaling.ScalingFunction):
+            self.scale = atleast_2d_col(self.scale)
             
         
     def function(self,x):
@@ -90,6 +99,14 @@ class Constraints(Object):
                tag=None, sense='=', edge=0.0, 
                scale=1.0 ):
         
+        if type(evaluator) is Constraint:
+            constraint = evaluator
+            evaluator = constraint.evaluator
+            tag   = constraint.tag
+            sense = constraint.sense
+            edge  = constraint.edge
+            scale = constraint.scale
+            
         if tag is None and isinstance(evaluator,Constraint):
             constraint = evaluator
             constraint.variables = self.variables

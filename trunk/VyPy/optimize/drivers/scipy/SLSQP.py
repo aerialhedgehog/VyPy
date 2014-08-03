@@ -1,6 +1,13 @@
 
+# ----------------------------------------------------------------------
+#   Imports
+# ----------------------------------------------------------------------
+
+import VyPy
+from VyPy.data import ibunch
 from VyPy.optimize.drivers import Driver
 import numpy as np
+from time import time
 
 try:
     import scipy
@@ -8,15 +15,21 @@ try:
 except ImportError:
     pass
 
+
 # ----------------------------------------------------------------------
 #   Sequential Least Squares Quadratic Programming
 # ----------------------------------------------------------------------
+
 class SLSQP(Driver):
-    def __init__(self,iprint=1):
+    def __init__(self):
         
+        # import check
         import scipy.optimize  
         
-        self.iprint = iprint
+        Driver.__init__(self)
+        
+        self.verbose        = True
+        self.max_iterations = 1000
     
     def run(self,problem):
         
@@ -39,13 +52,20 @@ class SLSQP(Driver):
         fprime         = self.fprime
         fprime_ieqcons = self.fprime_ieqcons
         fprime_eqcons  = self.fprime_eqcons  
-        iprint         = self.iprint
+        iprint         = 2
+        iters          = self.max_iterations
+        
+        # printing
+        if not self.verbose: iprint = 0
         
         # gradients?
         dobj,dineq,deq = problem.has_gradients()
         if not dobj : fprime         = None
         if not dineq: fprime_ieqcons = None
         if not deq  : fprime_eqcons  = None
+        
+        # start timing
+        tic = time()
         
         # run the optimizer
         x_min,f_min,its,imode,smode = optimizer( 
@@ -59,13 +79,26 @@ class SLSQP(Driver):
             fprime_eqcons  = fprime_eqcons  ,
             iprint         = iprint         ,
             full_output    = True           ,
+            iter           = iters          ,
+            **self.other_options.to_dict()
         )
         
-        x_min = self.problem.variables.scaled.unpack_array(x_min)
-        f_min = self.problem.objectives[0].evaluator.function(x_min)
+        # stop timing
+        toc = time() - tic
+        
+        vars_min = self.problem.variables.scaled.unpack_array(x_min)
+        
+        # pack outputs
+        outputs = self.pack_outputs(vars_min)
+        outputs.success               = imode == 0
+        outputs.messages.exit_flag    = imode
+        outputs.messages.exit_message = smode
+        outputs.messages.iterations   = its
+        outputs.messages.run_time     = toc
         
         # done!
-        return f_min, x_min, imode
+        return outputs
+            
     
     def func(self,x):
         objective = self.problem.objectives[0]
@@ -99,6 +132,7 @@ class SLSQP(Driver):
     def fprime(self,x):
         objective = self.problem.objectives[0]
         result = objective.gradient(x)
+        result = result.T
         result = np.vstack(result)
         result = np.squeeze(result)
         return result
@@ -108,10 +142,12 @@ class SLSQP(Driver):
         result = []
         for inequality in inequalities:
             res = inequality.gradient(x)
+            res = res.T
             res = -1 * res
             result.append(res)
         if result:
             result = np.vstack(result)
+            result = np.squeeze(result)
         return result
     
     def fprime_eqcons(self,x):
@@ -119,7 +155,9 @@ class SLSQP(Driver):
         result = []
         for equality in equalities:
             res = equality.gradient(x)
+            res = res.T
             result.append(res)
         if result:
             result = np.vstack(result)
+            result = np.squeeze(result)
         return result

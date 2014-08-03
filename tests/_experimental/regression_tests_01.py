@@ -15,6 +15,9 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 import matplotlib.pyplot as plt
 
+from warnings import simplefilter
+simplefilter('error',Warning)
+
 
 def main():
     
@@ -153,8 +156,10 @@ def fit_ND():
     # ---------------------------------------------------------    
     
     # functions to plot, in scaled space
-    f1 = lambda(Z): Model.predict(Z).YI                               
-    f2 = lambda(Z): Scaling.Y.set_scaling( The_Func( Scaling.X.unset_scaling(Z) )[0] ) 
+    f1 = Model.predict_YI
+    f2 = lambda(Z): The_Func(Z)[0] 
+    f2 = Scaling.wrap_function(f2)
+    
     # center point, scaled space
     x0 = Scaling.X.set_scaling( [1.0] * ND )
     # plot bounds, scaled space

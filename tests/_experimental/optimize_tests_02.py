@@ -19,25 +19,27 @@ def main():
     pass
 
 
-def test_func(inputs):
-    x1 = inputs.x1
-    x2 = inputs['x2']
-    x3 = inputs.x3
+class Test_Evaluator(opt.Evaluator):
     
-    #print inputs
-    
-    f = x1**2 + x2**2 + np.sum(x3)**2
-    c = x1 + x2 + x3[0]
-    c2 = x3 - 1.
-    
-    outputs = obunch()
-    outputs.f  = f
-    outputs.c  = c
-    outputs.c2 = c2
-    
-    #print outputs
-    
-    return outputs
+    def function(self,inputs):
+        x1 = inputs.x1
+        x2 = inputs['x2']
+        x3 = inputs.x3
+        
+        #print inputs
+        
+        f = x1**2 + x2**2 + np.sum(x3)**2
+        c = x1 + x2 + x3[0]
+        c2 = x3 - 1.
+        
+        outputs = obunch()
+        outputs.f  = f
+        outputs.c  = c
+        outputs.c2 = c2
+        
+        #print outputs
+        
+        return outputs
     
 
 def test_1():
@@ -60,18 +62,22 @@ def test_1():
     var.scale   = opt.scaling.Linear(scale=4.0,center=10.0)
     problem.variables.append(var)
     
+    
+    # start an evaluator
+    test_eval = Test_Evaluator()
+    
     problem.objectives = [
     #   [ func   , 'tag', scl ],
-        [ test_func, 'f', 1.0 ],
+        [ test_eval, 'f', 1.0 ],
     ]
     
     problem.constraints = [
     #   [ func , ('tag' ,'><=', val), scl] ,
-        [ test_func, ('c','=',1.), 1.0 ],
+        [ test_eval, ('c','=',1.), 1.0 ],
     ]
     
     con = opt.Equality()
-    con.evaluator = test_func
+    con.evaluator = test_eval
     con.tag       = 'c2'
     con.sense     = '='
     con.edge      = np.array([3.,3.,3.])

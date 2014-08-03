@@ -90,6 +90,13 @@ def spider_trace(AX,FF,X0,XB,NP,*plt_args,**plt_kwarg):
         
     #: for each dimension
     
+    # center point
+    AX.plot([0.],[0.],[0.],'k+',mew=2,ms=15)
+    Z0 = FF(X0)[:,0]
+    p = AX.plot([0.],[0.],Z0,mew=2,ms=13,*plt_args)
+    p[0].set_marker('+')
+    
+    
     # disable x and y axis tick labels
     AX.xaxis.set_ticklabels([])
     AX.yaxis.set_ticklabels([])

@@ -44,7 +44,7 @@ class Learning(object):
         # Run Global Optimization
         print '  Global Optimization (CMA_ES)'
         driver = optimize.drivers.CMA_ES( rho_scl = 0.10  ,
-                                          n_eval  = 1000 ,
+                                          n_eval  = 1000 , # 1000
                                           iprint  = 0     )
         [logP_min,Hyp_min,result] = driver.run(problem)
         
@@ -72,7 +72,7 @@ class Learning(object):
         
         try:
             Infer.precalc()
-        except EvaluationFailure:
+        except Exception:
             raise EvaluationFailure, 'learning failed, could not precalculate kernel'
         
         return

@@ -90,7 +90,7 @@ class Likelihood(Learning):
             }
             
         # - failed ouptus -------
-        except EvaluationFailure:
+        except Exception: #EvaluationFailure:
             outputs = {
                 'logP'  : -1e10  ,
                 #'DlogP' : DlogP ,

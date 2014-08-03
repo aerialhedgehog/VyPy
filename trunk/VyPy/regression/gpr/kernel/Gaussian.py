@@ -263,8 +263,9 @@ class Gaussian(Kernel):
         DY = Train.DY     
         
         # noise constraints
-        probNze = Hypers['probNze']
-        bndNze  = 2.0
+        sig_ny  = Hypers['sig_ny']
+        sig_ndy = Hypers['sig_ndy']
+        bound_buffer  = 2.0
         
         # feature and target ranges
         DX_min,DX_max,_ = vector_distance(X);
@@ -273,16 +274,16 @@ class Gaussian(Kernel):
         if DX_min < 1e-6: DX_min = 1e-6;
         if DY_min < 1e-6: DY_min = 1e-6;
         
-        sig_lo = np.log10(DY_min)-2.
-        sig_hi = np.log10(DY_max)+2.
-        len_lo = np.log10(DX_min)-2.
-        len_hi = np.log10(DX_max)+1.
+        sig_lo = np.log10(DY_min) - bound_buffer
+        sig_hi = np.log10(DY_max) + bound_buffer
+        len_lo = np.log10(DX_min) - bound_buffer
+        len_hi = np.log10(DX_max) + bound_buffer
         
         # noise ranges
-        #nze_lo = max([ probNze-bndNze , -10.  ])
-        #nze_hi = max([ probNze+bndNze , -0.01 ])
-        nze_lo = probNze-bndNze
-        nze_hi = probNze+bndNze
+        sny_lo  = sig_ny  - bound_buffer
+        sny_hi  = sig_ny  + bound_buffer
+        sndy_lo = sig_ndy - bound_buffer
+        sndy_hi = sig_ndy + bound_buffer        
         
         # some noise limits
         max_noise_ratio = -1.0
@@ -291,11 +292,11 @@ class Gaussian(Kernel):
         
         # set variables and bound constraints
         problem.variables = [
-        #   ['tag'     , x0               , (lb,ub)        , scl ] ,
-            ['sig_f'   , Hypers['sig_f']  , (sig_lo,sig_hi), 1.0 ] ,
-            ['len_s'   , Hypers['len_s']  , (len_lo,len_hi), 1.0 ] ,
-            ['sig_ny'  , Hypers['sig_ny'] , (nze_lo,nze_hi), 1.0 ] ,
-            ['sig_ndy' , Hypers['sig_ndy'], (nze_lo,nze_hi), 1.0 ] ,
+        #   ['tag'     , x0               , (lb,ub)          , scl ] , 
+            ['sig_f'   , Hypers['sig_f']  , (sig_lo ,sig_hi ), 1.0 ] ,
+            ['len_s'   , Hypers['len_s']  , (len_lo ,len_hi ), 1.0 ] ,
+            ['sig_ny'  , Hypers['sig_ny'] , (sny_lo ,sny_hi ), 1.0 ] ,
+            ['sig_ndy' , Hypers['sig_ndy'], (sndy_lo,sndy_hi), 1.0 ] ,
         ]
         
         problem.constraints = [
@@ -305,7 +306,7 @@ class Gaussian(Kernel):
             [ self.learning_cons , ('nze_rat_dy','<', max_noise_ratio), 1. ] ,
             [ self.learning_cons , ('nze_rat_dy','>', min_noise_ratio), 1. ] ,
             [ self.learning_cons , ('rel_nze'   ,'<', 0.0            ), 1. ] ,
-            [ self.learning_cons , ('nze_dev'   ,'<', 0.0            ), 1. ] ,
+            #[ self.learning_cons , ('nze_dev'   ,'<', 1.0            ), 1. ] ,
             #[ self.likelihood_cons , ('k_cond'    ,'>', Kcond_limit    ), 1. ] ,
         ]
                 
@@ -333,10 +334,10 @@ class Gaussian(Kernel):
         # - successfull ouputs -------
             # the constraints
             constraints = {
-                'nze_rat_y'  : noise_ratio_y        , 
-                'nze_rat_dy' : noise_ratio_dy       ,    
-                'rel_nze'    : sig_ny  - sig_ndy    ,  
-                'nze_dev'    : sig_ndy - sig_ny - 1 ,  
+                'nze_rat_y'  : noise_ratio_y      , 
+                'nze_rat_dy' : noise_ratio_dy     ,    
+                'rel_nze'    : sig_ny  - sig_ndy  ,  
+                'nze_dev'    : sig_ndy - sig_ny   ,  
                 #'k_cond'     : np.log10(Kcond)     , # expensive
             }
             

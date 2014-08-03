@@ -8,7 +8,7 @@ from Constraint import Constraint
 
 from VyPy.data import IndexableDict
 from VyPy.data.input_output import flatten_list
-from VyPy.tools.arrays import atleast_2d
+from VyPy.tools.arrays import atleast_2d, atleast_2d_row
 
     
 # ----------------------------------------------------------------------
@@ -37,15 +37,17 @@ class Inequality(Constraint):
         val  = self.edge
         scl  = self.scale
         
+        result = func(x)[tag]
+        
+        result = atleast_2d(result,'col')
+        
         if snz == '>':
-            result = val/scl - func(x)[tag]/scl
+            result = val/scl - result/scl
         elif snz == '<':
-            result = func(x)[tag]/scl - val/scl
+            result = result/scl - val/scl
         else:
             raise Exception, 'unrecognized sense %s' % snz        
         
-        result = atleast_2d(result,'col')
-                
         return result
     
     def gradient(self,x):
@@ -57,16 +59,16 @@ class Inequality(Constraint):
         snz  = self.sense
         scl  = self.scale
         
-        if snz == '>':
-            result = -1* func(x)[tag]
-        elif snz == '<':
-            result = +1* func(x)[tag]
-        else:
-            raise Exception, 'unrecognized sense %s' % snz        
-        
-        result = result / scl
+        result = func(x)[tag]
         
         result = atleast_2d(result,'row')
+        
+        if snz == '>':
+            result = -1 * result / scl
+        elif snz == '<':
+            result = +1 * result / scl
+        else:
+            raise Exception, 'unrecognized sense %s' % snz        
         
         return result 
     

@@ -52,13 +52,25 @@ class Linear(ScalingBunch):
     
     #: def calc_scaling()
     
+    def wrap_function(self,function):
+        return Scaled_Function(self,function)
     
     
-    
-    
-    
-    
-    
+class Scaled_Function(object):
+    def __init__(self,Scaling,function):
+        self.Scaling = Scaling
+        self.function = function
+        
+    def __call__(self,X):
+        
+        Scaling = self.Scaling
+        function = self.function
+        
+        X = Scaling.X.unset_scaling(X)
+        Y = function(X)
+        Y = Scaling.Y.set_scaling(Y)
+        
+        return Y
     
     
     

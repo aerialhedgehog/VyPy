@@ -46,9 +46,9 @@ class Objective(Evaluator):
         
         result = func(x)[tag]
         
-        result = result / scl
-        
         result = atleast_2d_col(result)
+        
+        result = result / scl
         
         return result
     
@@ -62,9 +62,9 @@ class Objective(Evaluator):
         
         result = func(x)[tag]
         
-        result = result / scl ## !!! PROBLEM WHEN SCL is NOT CENTERED
-        
         result = atleast_2d_row(result)
+        
+        result = result / scl ## !!! PROBLEM WHEN SCL is NOT CENTERED
         
         return result
     

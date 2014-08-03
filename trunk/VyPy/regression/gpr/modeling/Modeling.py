@@ -1,5 +1,5 @@
 
-import sys, copy, weakref,gc
+import sys, copy
 
 import numpy as np
 import scipy as sp
@@ -47,6 +47,9 @@ class Modeling(object):
             data = self.Scaling.unset_scaling(data)                
         
         return data
+    
+    def predict_YI(self,XI):
+        return self.predict(XI).YI
     
     def safe_precalc(self):
         if self._current:

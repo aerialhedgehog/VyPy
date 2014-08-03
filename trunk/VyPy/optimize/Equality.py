@@ -8,7 +8,7 @@ from Constraint import Constraint
 
 from VyPy.data import IndexableDict
 from VyPy.data.input_output import flatten_list
-from VyPy.tools.arrays import atleast_2d
+from VyPy.tools.arrays import atleast_2d, atleast_2d_row
 
 
 # ----------------------------------------------------------------------
@@ -37,9 +37,11 @@ class Equality(Constraint):
         val  = self.edge
         scl  = self.scale
         
-        result = func(x)[tag]/scl - val/scl
+        result = func(x)[tag]
         
         result = atleast_2d(result,'col')
+        
+        result = result/scl - val/scl
         
         return result
     
@@ -53,9 +55,9 @@ class Equality(Constraint):
         
         result = func(x)[tag]
         
-        result = result / scl ## !!! PROBLEM WHEN SCL is NOT CENTERED
-        
         result = atleast_2d(result,'row')
+        
+        result = result / scl ## !!! PROBLEM WHEN SCL is NOT CENTERED
         
         return result    
 
