@@ -86,6 +86,7 @@ class SLSQP(Driver):
         # stop timing
         toc = time() - tic
         
+        # get final variables
         vars_min = self.problem.variables.scaled.unpack_array(x_min)
         
         # pack outputs

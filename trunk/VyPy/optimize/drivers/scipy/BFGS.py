@@ -1,6 +1,11 @@
 
+# ----------------------------------------------------------------------
+#   Imports
+# ----------------------------------------------------------------------
+
 from VyPy.optimize.drivers import Driver
 import numpy as np
+from time import time
 
 try:
     import scipy
@@ -8,16 +13,21 @@ try:
 except ImportError:
     pass
 
+
 # ----------------------------------------------------------------------
 #   Broyden-Fletcher-Goldfarb-Shanno Algorithm
 # ----------------------------------------------------------------------
+
 class BFGS(Driver):
-    def __init__(self,iprint=1,n_eval=100):
+    def __init__(self):
         
+        # test import
         import scipy.optimize
         
-        self.iprint  = iprint
-        self.n_eval  = n_eval
+        Driver.__init__(self)
+        
+        self.max_iterations = 1000
+        
     
     def run(self,problem):
         
@@ -35,18 +45,36 @@ class BFGS(Driver):
         func   = self.func
         fprime = None
         x0     = problem.variables.scaled.initials_array()
+        n_iter = self.max_iterations
+        disp   = self.verbose
+        
+        # start timing
+        tic = time()
         
         # run the optimizer
-        x_min = optimizer( f       = func   ,
-                           x0      = x0     ,
-                           fprime  = fprime ,
-                           maxiter = self.n_eval )
+        result = optimizer( f       = func   ,
+                            x0      = x0     ,
+                            fprime  = fprime ,
+                            full_output = True ,
+                            disp    = disp   ,
+                            maxiter = n_iter  )
         
-        x_min = self.problem.variables.scaled.unpack_array(x_min)
-        f_min = self.problem.objectives[0].evaluator.function(x_min)        
+        # stop timing
+        toc = time() - tic        
+        
+        # get final variables
+        x_min = result[0]        
+        vars_min = self.problem.variables.scaled.unpack_array(x_min)
+        
+        # pack outputs
+        outputs = self.pack_outputs(vars_min)
+        outputs.success               = result[6] == 0
+        outputs.messages.exit_flag    = result[6]
+        outputs.messages.evaluations  = result[4]
+        outputs.messages.run_time     = toc
         
         # done!
-        return f_min, x_min, None
+        return outputs
 
     def func(self,x):
         

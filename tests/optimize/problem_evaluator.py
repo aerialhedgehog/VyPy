@@ -101,6 +101,23 @@ def setup_problem():
   
     # print
     print problem  
+    
+    # expected answer
+    truth = obunch()
+    truth.variables  = obunch()
+    truth.objectives = obunch()
+    truth.equalities = obunch()
+    
+    truth.variables.x1 = -1.5
+    truth.variables.x2 = -1.5
+    truth.variables.x3 = np.array([ 4., 4., 4.])
+    
+    truth.objectives.f = 148.5
+    
+    truth.equalities.c  = 1.0
+    truth.equalities.c2 = np.array([ 3., 3., 3.])
+    
+    problem.truth = truth    
   
     # done!
     return problem

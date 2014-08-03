@@ -1,6 +1,7 @@
 
 from VyPy.optimize.drivers import Driver
 import numpy as np
+from time import time
 
 try:
     import cma
@@ -11,16 +12,19 @@ except ImportError:
 #   Covariance Matrix Adaptation - Evolutionary Strategy
 # ----------------------------------------------------------------------
 class CMA_ES(Driver):
-    def __init__(self, iprint=1, rho_scl = 0.10, n_eval=None):
+    def __init__(self):
         
         try:
             import cma
         except ImportError:
             raise ImportError, 'Could not import cma, please install with pip: "> pip install cma"'
         
-        self.iprint  = iprint
-        self.rho_scl = rho_scl
-        self.n_eval  = n_eval or np.inf
+        Driver.__init__(self)
+        
+        self.verbose                   = True
+        self.print_iterations          = 1
+        self.stdandard_deviation_ratio = 0.10
+        self.max_evaluations           = np.inf
     
     def run(self,problem):
         
@@ -41,14 +45,23 @@ class CMA_ES(Driver):
         sigma0 = self.sigma0()
         bounds = problem.variables.scaled.bounds_array()
         bounds = [ bounds[:,0] , bounds[:,1] ]
+        evals  = self.max_evaluations
+        iprint = self.print_iterations
+        
+        # printing
+        if not self.verbose: iprint = 0
         
         options = {
             'bounds'    : bounds      ,
-            'verb_disp' : self.iprint ,
+            'verb_disp' : iprint      ,
             'verb_log'  : 0           ,
             'verb_time' : 0           ,
-            'maxfevals' : self.n_eval ,
+            'maxfevals' : evals       ,
         }
+        options.update(self.other_options.to_dict())
+        
+        # start timing
+        tic = time()
         
         # run the optimizer
         result = optimizer( 
@@ -58,16 +71,33 @@ class CMA_ES(Driver):
             options            = options ,
         )
         
+        # stop timing
+        toc = time() - tic
         
-        x_min = result[0].tolist()
-        f_min = result[1]
+        # pull minimizing variables
+        x_min = result[0]
+        vars_min = self.problem.variables.scaled.unpack_array(x_min)
         
-        x_min = self.problem.variables.scaled.unpack_array(x_min)
-        f_min = self.problem.objectives[0].evaluator.function(x_min)
+        # stringify message keys
+        messages = { str(k):v for k,v in result[7].items() }
         
-        # done!
-        return f_min, x_min, result
-
+        # success criteria
+        success = False
+        for k in ['ftarget','tolx','tolfun']:
+            if messages.has_key(k):
+                success = True
+                break
+        
+        # pack outputs
+        outputs = self.pack_outputs(vars_min)
+        outputs.success               = success
+        outputs.messages.exit_message = messages
+        outputs.messages.evaluations  = result[3]
+        outputs.messages.iterations   = result[4]
+        outputs.messages.run_time     = toc
+        
+        return outputs
+    
     def func(self,x):
         
         obj  = self.objective(x)[0,0]
@@ -107,7 +137,59 @@ class CMA_ES(Driver):
     
     def sigma0(self):
         bounds = self.problem.variables.scaled.bounds_array()
-        sig0 = np.mean( np.diff(bounds) ) * self.rho_scl
+        sig0 = np.mean( np.diff(bounds) ) * self.stdandard_deviation_ratio
         return sig0
         
 
+    
+"""
+
+        `sigma0`
+            initial standard deviation.  The problem variables should
+            have been scaled, such that a single standard deviation
+            on all variables is useful and the optimum is expected to
+            lie within about `x0` +- ``3*sigma0``. See also options
+            `scaling_of_variables`. Often one wants to check for
+            solutions close to the initial point. This allows,
+            for example, for an easier check of consistency of the
+            objective function and its interfacing with the optimizer.
+            In this case, a much smaller `sigma0` is advisable.
+
+
+    
+ftarget
+    -inf  
+    target function value, minimization
+maxfevals
+    inf  
+    maximum number of function evaluations
+maxiter
+    100 + 50 * (N+3)**2 // popsize**0.5  
+    maximum number of iterations
+tolx
+    1e-11
+    termination criterion: tolerance in x-changes
+tolfacupx
+    1e3
+    termination when step-size increases by tolfacupx 
+    (diverges). That is, the initial step-size was chosen 
+    far too small and better solutions were found far away 
+    from the initial solution x0',
+tolfun
+    1e-11  
+    tolerance in function value
+tolfunhist
+    1e-12  
+    tolerance in function value history, minimum movement 
+    after first 9 iterations 
+tolstagnation
+    int(100 + 100 * N**1.5 / popsize)
+    termination if no improvement over tolstagnation iterations
+tolupsigma
+    1e20
+    tolerance on "creeping behavior"
+    sigma/sigma0 > tolupsigma * max(sqrt(eivenvals(C))) 
+    indicates "creeping behavior" with usually minor 
+    improvements
+
+"""

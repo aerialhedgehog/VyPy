@@ -19,14 +19,13 @@ import VyPy.optimize as opt
 # ----------------------------------------------------------------------    
 
 def main():
-    """ test the SLSQP Optimizer, with a test problem function """
+    """ test the CMA_ES Optimizer, with a test problem evaluator """
     
     # ------------------------------------------------------------------
     #   Get the problem
     # ------------------------------------------------------------------
     
-    from problem_function import setup_problem
-    #from problem_evaluator import setup_problem
+    from problem_evaluator import setup_problem
     problem = setup_problem()
     
     
@@ -34,9 +33,11 @@ def main():
     #   Setup Driver
     # ------------------------------------------------------------------    
     
-    driver = opt.drivers.SLSQP()
-    driver.max_iterations = 1000
-    driver.verbose = True
+    driver = opt.drivers.CMA_ES()
+    driver.max_evaluations  = 10000
+    driver.verbose          = True
+    driver.print_iterations = 100
+    
     
     # ------------------------------------------------------------------
     #   Run the Problem
@@ -61,10 +62,10 @@ def main():
     
     delta = truth.do_recursive(check,results)
     
-    print 'Error to Expected:'
+    print 'Errors Against Expected:'
     print delta
     
-    assert np.all( delta.pack_array() < 1e-6 )
+    assert np.all( delta.pack_array() < 1e-2 )
     assert len( delta.pack_array() ) == 10
     
     # done!

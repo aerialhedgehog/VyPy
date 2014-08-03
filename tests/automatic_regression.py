@@ -34,6 +34,9 @@ modules = [
     'optimize/problem_function.py',
     'optimize/problem_evaluator.py',
     'optimize/driver_slsqp.py',
+    'optimize/driver_cma.py',
+    'optimize/driver_cobyla.py',
+    'optimize/driver_bfgs.py',
 ]
 
 

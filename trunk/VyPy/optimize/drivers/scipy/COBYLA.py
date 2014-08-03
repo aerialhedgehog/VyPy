@@ -2,6 +2,7 @@
 from VyPy.optimize.drivers import Driver
 from VyPy.parallel import Remember
 import numpy as np
+from time import time
 
 try:
     import scipy
@@ -13,15 +14,19 @@ except ImportError:
 #   Constrained Optimization BY Linear Approximation
 # ----------------------------------------------------------------------
 class COBYLA(Driver):
-    def __init__(self,iprint=1,n_eval=100,rho_scl=0.01):
+    def __init__(self):
         
+        # test import
         import scipy.optimize        
         
-        self.iprint = iprint
-        self.n_eval = int(n_eval)
-        self.rho_scl = rho_scl
+        Driver.__init__(self)
         
-        # this cache is a special requirement for scipy's COBYLA
+        self.max_evaluations    = 1000
+        self.trust_region_scale_start = 1.0
+        self.trust_region_scale_end   = 1e-4
+        
+        # this cache is a special requirement for scipy's 
+        # COBYLA constraints
         self._cache = {'x':None, 'c':None}
     
     def run(self,problem):
@@ -41,8 +46,15 @@ class COBYLA(Driver):
         x0     = self.problem.variables.scaled.initials_array()
         cons   = self.setup_cons()
         rhobeg = self.rhobeg()
-        rhoend = [ r*0.0001 for r in rhobeg ]
-        iprint = self.iprint
+        rhoend = [ r*self.trust_region_scale_end for r in rhobeg ]
+        iprint = 1
+        n_eval = self.max_evaluations
+        
+        # verbosity
+        if not self.verbose: iprint = 0
+        
+        # start timing
+        tic = time()
         
         x_min = optimizer( 
             func      = func   ,
@@ -51,16 +63,22 @@ class COBYLA(Driver):
             rhobeg    = rhobeg ,
             rhoend    = rhoend ,
             iprint    = iprint ,
-            maxfun    = self.n_eval,
+            maxfun    = n_eval ,
         )
         
-        # nice: store result = fmin,xmin,iterations,time to problem history
-
-        x_min = self.problem.variables.scaled.unpack_array(x_min)
-        f_min = self.problem.objectives[0].evaluator.function(x_min)        
+        # stop timing
+        toc = time() - tic
+        
+        # pull minimizing variables
+        vars_min = self.problem.variables.scaled.unpack_array(x_min)
+        
+        # pack outputs
+        outputs = self.pack_outputs(vars_min)
+        outputs.success           = True
+        outputs.messages.run_time = toc
         
         # done!
-        return f_min, x_min, None
+        return outputs
         
     def func(self,x):
         objective = self.problem.objectives[0]
@@ -120,7 +138,7 @@ class COBYLA(Driver):
         rho = []
         for b in bounds:
             lo,hi = b
-            r = (hi-lo)*self.rho_scl
+            r = (hi-lo)*self.trust_region_scale_start
             rho.append(r)
         return rho
     
