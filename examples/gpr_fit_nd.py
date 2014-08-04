@@ -144,8 +144,11 @@ def main():
     ax.legend()
     ax.set_zlabel('F')
     
-    plt.draw(); 
-    plt.show(block=True)    
+    plt.draw()
+    
+    # show the plot
+    ## plt.show(block=True) 
+    # moved to the end of the file to allow regression testing
     
     
     # Done!
@@ -216,5 +219,5 @@ def hyperplane_function(X):
 
 if __name__=='__main__':
     main()
-
+    plt.show(block=True)        
 

@@ -205,7 +205,8 @@ def main():
     #truh = ax.plot_surface(xi,yi,ft, cmap=cm.autumn, rstride=1,cstride=1, linewidth=0, antialiased=False)
     
     # show the plot
-    plt.show(block=True)
+    ## plt.show(block=True) 
+    # moved to the end of the file to allow regression testing
     
     # Done!
     return
@@ -274,6 +275,7 @@ def hyperplane_function(X):
 # -------------------------------------------------------------
 
 if __name__=='__main__':
-    main()
 
+    main()
+    plt.show(block=True)
 

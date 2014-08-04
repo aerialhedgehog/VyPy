@@ -12,6 +12,8 @@ from VyPy.data import OrderedBunch
 import sys, os, traceback, time
 import matplotlib.pyplot as plt
 
+
+
 # ----------------------------------------------------------------------        
 #   How This Works
 # ----------------------------------------------------------------------        
@@ -57,6 +59,10 @@ modules = [
     # regression
     'regression/gpr_fit_2d.py',
     'regression/gpr_fit_nd.py',
+    
+    # examples
+    '../examples/gpr_fit_2d.py',
+    '../examples/gpr_fit_nd.py',
 
 ]
 
