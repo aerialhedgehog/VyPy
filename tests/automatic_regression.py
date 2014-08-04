@@ -31,12 +31,33 @@ import matplotlib.pyplot as plt
 # ----------------------------------------------------------------------        
 
 modules = [
+
+    # data
+    'data/bunch.py',
+    'data/ordered_dict.py',
+    'data/ordered_bunch.py',
+    'data/indexable_bunch.py',
+    'data/hashed_dict.py',
+    'data/data_bunch.py',    
+    
+    # parallel
+    'parallel/operation.py',
+    'parallel/remember.py',
+    'parallel/multitask.py',
+    'parallel/multiremember.py',    
+    
+    # optimize
     'optimize/problem_function.py',
     'optimize/problem_evaluator.py',
     'optimize/driver_slsqp.py',
     'optimize/driver_cma.py',
     'optimize/driver_cobyla.py',
     'optimize/driver_bfgs.py',
+    
+    # regression
+    'regression/gpr_fit_2d.py',
+    'regression/gpr_fit_nd.py',
+
 ]
 
 

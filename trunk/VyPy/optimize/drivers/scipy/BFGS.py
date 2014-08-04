@@ -52,12 +52,15 @@ class BFGS(Driver):
         tic = time()
         
         # run the optimizer
-        result = optimizer( f       = func   ,
-                            x0      = x0     ,
-                            fprime  = fprime ,
-                            full_output = True ,
-                            disp    = disp   ,
-                            maxiter = n_iter  )
+        result = optimizer( 
+            f           = func   ,
+            x0          = x0     ,
+            fprime      = fprime ,
+            full_output = True   ,
+            disp        = disp   ,
+            maxiter     = n_iter ,
+            **self.other_options.to_dict() 
+        )
         
         # stop timing
         toc = time() - tic        

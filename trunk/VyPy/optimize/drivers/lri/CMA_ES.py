@@ -21,10 +21,10 @@ class CMA_ES(Driver):
         
         Driver.__init__(self)
         
-        self.verbose                   = True
-        self.print_iterations          = 1
-        self.stdandard_deviation_ratio = 0.10
-        self.max_evaluations           = np.inf
+        self.verbose                  = True
+        self.print_iterations         = 1
+        self.standard_deviation_ratio = 0.10
+        self.max_evaluations          = np.inf
     
     def run(self,problem):
         
@@ -137,7 +137,7 @@ class CMA_ES(Driver):
     
     def sigma0(self):
         bounds = self.problem.variables.scaled.bounds_array()
-        sig0 = np.mean( np.diff(bounds) ) * self.stdandard_deviation_ratio
+        sig0 = np.mean( np.diff(bounds) ) * self.standard_deviation_ratio
         return sig0
         
 

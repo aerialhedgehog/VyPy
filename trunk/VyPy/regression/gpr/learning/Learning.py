@@ -43,19 +43,25 @@ class Learning(object):
         
         # Run Global Optimization
         print '  Global Optimization (CMA_ES)'
-        driver = optimize.drivers.CMA_ES( rho_scl = 0.10  ,
-                                          n_eval  = 1000 , # 1000
-                                          iprint  = 0     )
-        [logP_min,Hyp_min,result] = driver.run(problem)
+        driver = optimize.drivers.CMA_ES()
+        driver.verbose                  = False
+        driver.standard_deviation_ratio = 0.10
+        driver.max_evaluations          = 1000
+        
+        results = driver.run(problem)
         
         # setup next problem
-        problem.variables.set(initials=Hyp_min)
+        problem.variables.set(initials=results.variables)
         problem.objectives['logP'].scale = -1.0e-2
         
         # Run Local Refinement
         print '  Local Optimization (SLSQP)'
-        driver = optimize.drivers.scipy.SLSQP( iprint = 0 )   
-        [logP_min,Hyp_min,result] = driver.run(problem)
+        driver = optimize.drivers.scipy.SLSQP()   
+        driver.verbose = False
+        
+        results = driver.run(problem)
+        logP_min = results.objectives.logP
+        Hyp_min  = results.variables
         
         #print 'Local Optimization (COBYLA)'
         #driver = opt.drivers.scipy.COBYLA()   
