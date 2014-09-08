@@ -49,7 +49,35 @@ class Test_Evaluator(opt.Evaluator):
         outputs.c2 = c2
         
         return outputs
-
+    
+    def gradient(self,inputs):
+        
+        # unpack inputs
+        x1 = inputs.x1
+        x2 = inputs['x2']
+        x3 = inputs.x3  
+        
+        # prep outputs
+        grads = obunch()
+        grads.f  = obunch()
+        grads.c  = obunch()
+        grads.c2 = obunch()
+        
+        # the math
+        grads.f.x1 = 2*x1
+        grads.f.x2 = 2*x2 
+        grads.f.x3 = 2*x3
+        grads.c.x1 = 1.
+        grads.c.x2 = 1.
+        grads.c.x3 = np.array([1.,0,0])
+        grads.c2.x1 = np.zeros([3,1])
+        grads.c2.x2 = np.zeros([3,1])
+        grads.c2.x3 = np.eye(3)
+        
+        return grads
+    
+    #gradient = None
+    
 # ----------------------------------------------------------------------
 #   Setup an Optimization Problem
 # ----------------------------------------------------------------------
@@ -73,7 +101,7 @@ def setup_problem():
     ub = np.array([30.]*3)
     lb = np.array([-1.]*3)
     var.bounds  = (lb,ub)
-    var.scale   = opt.scaling.Linear(scale=4.0,center=10.0)
+    var.scale   = 1.0
     problem.variables.append(var)
     
     # initialize evaluator
@@ -92,10 +120,10 @@ def setup_problem():
     ]
     
     # setup constraint, array style
-    con = opt.Equality()
+    con = opt.Constraint()
     con.evaluator = test_eval
     con.tag       = 'c2'
-    con.sense     = '='
+    con.sense     = '>'
     con.edge      = np.array([3.,3.,3.])
     problem.constraints.append(con)
   
@@ -104,9 +132,10 @@ def setup_problem():
     
     # expected answer
     truth = obunch()
-    truth.variables  = obunch()
-    truth.objectives = obunch()
-    truth.equalities = obunch()
+    truth.variables    = obunch()
+    truth.objectives   = obunch()
+    truth.equalities   = obunch()
+    truth.inequalities = obunch()
     
     truth.variables.x1 = -1.5
     truth.variables.x2 = -1.5
@@ -114,8 +143,8 @@ def setup_problem():
     
     truth.objectives.f = 148.5
     
-    truth.equalities.c  = 1.0
-    truth.equalities.c2 = np.array([ 3., 3., 3.])
+    truth.equalities.c = 1.0
+    truth.inequalities.c2 = np.array([ 3., 3., 3.])
     
     problem.truth = truth    
   

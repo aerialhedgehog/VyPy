@@ -57,7 +57,7 @@ def main():
     
     # the checking function
     def check(a,b):
-        return a-b
+        return np.abs(a-b)
     
     delta = truth.do_recursive(check,results)
     

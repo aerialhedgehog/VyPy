@@ -1,1 +1,1 @@
-from scipy import BFGS
+from .scipy import L_BFGS_B as BFGS

@@ -30,6 +30,7 @@ class SLSQP(Driver):
         
         self.verbose        = True
         self.max_iterations = 1000
+        self.objective_accuracy = None
     
     def run(self,problem):
         
@@ -54,6 +55,10 @@ class SLSQP(Driver):
         fprime_eqcons  = self.fprime_eqcons  
         iprint         = 2
         iters          = self.max_iterations
+        accuracy       = self.objective_accuracy or 1e-6
+        
+        # objective scaling
+        accuracy = accuracy
         
         # printing
         if not self.verbose: iprint = 0
@@ -80,6 +85,7 @@ class SLSQP(Driver):
             iprint         = iprint         ,
             full_output    = True           ,
             iter           = iters          ,
+            acc            = accuracy       ,
             **self.other_options.to_dict()
         )
         
@@ -133,32 +139,25 @@ class SLSQP(Driver):
     def fprime(self,x):
         objective = self.problem.objectives[0]
         result = objective.gradient(x)
-        result = result.T
-        result = np.vstack(result)
         result = np.squeeze(result)
         return result
     
     def fprime_ieqcons(self,x):
         inequalities = self.problem.inequalities
-        result = []
-        for inequality in inequalities:
-            res = inequality.gradient(x)
-            res = res.T
-            res = -1 * res
-            result.append(res)
-        if result:
+        if inequalities:
+            result = [ -1.*inequality.gradient(x) for inequality in inequalities ]
             result = np.vstack(result)
             result = np.squeeze(result)
+        else:
+            result = np.empty([x.shape[0]])
         return result
     
     def fprime_eqcons(self,x):
         equalities = self.problem.equalities
-        result = []
-        for equality in equalities:
-            res = equality.gradient(x)
-            res = res.T
-            result.append(res)
-        if result:
+        if equalities:
+            result = [ equality.gradient(x) for equality in equalities ]
             result = np.vstack(result)
             result = np.squeeze(result)
+        else:
+            result = np.empty([x.shape[0]])
         return result

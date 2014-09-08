@@ -7,6 +7,8 @@ from Evaluator import Evaluator
 
 from VyPy.data import IndexableDict
 from VyPy.tools.arrays import atleast_2d_col, atleast_2d_row
+
+import numpy as np
     
 # ----------------------------------------------------------------------
 #   Objective Function
@@ -58,13 +60,15 @@ class Objective(Evaluator):
         
         func = self.evaluator.gradient
         tag  = self.tag
-        scl  = self.scale
+        fscl = self.scale
         
-        result = func(x)[tag]
+        res = func(x)[tag]
         
-        result = atleast_2d_row(result)
+        result = [ atleast_2d_row(res[k]) * self.variables[k].scale 
+                   for k in self.variables.keys() ]
+        result = np.hstack(result)
         
-        result = result / scl ## !!! PROBLEM WHEN SCL is NOT CENTERED
+        result = result / fscl ## !!! PROBLEM WHEN SCL is NOT CENTERED
         
         return result
     

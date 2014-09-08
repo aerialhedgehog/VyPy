@@ -3,7 +3,8 @@
 #   Imports
 # ----------------------------------------------------------------------
 
-from Evaluator  import Evaluator
+from Objective import Objective
+from Evaluator import Evaluator
 
 import VyPy
 from VyPy.data import Object, IndexableDict, Descriptor
@@ -14,7 +15,7 @@ from VyPy.tools import atleast_2d_col, atleast_2d_row
 #   Constraint Function
 # ----------------------------------------------------------------------
 
-class Constraint(Evaluator):
+class Constraint(Objective):
     
     Container = None
     
@@ -23,7 +24,7 @@ class Constraint(Evaluator):
                   scale=1.0,
                   variables=None):
         
-        Evaluator.__init__(self)
+        Objective.__init__(self)
         
         self.evaluator = evaluator
         self.tag       = tag
@@ -35,30 +36,15 @@ class Constraint(Evaluator):
 
     def __check__(self):
 
-        # evaluator class
-        if not isinstance(self.evaluator, Evaluator):
-            self.evaluator = Evaluator(function=self.evaluator)
-        
-        # gradients and hessians
-        if self.evaluator.gradient is None:
-            self.gradient = None
-        if self.evaluator.hessian is None:
-            self.hessian = None
+        Objective.__check__(self)
             
         # arrays
         self.edge = atleast_2d_col(self.edge)
         if not isinstance(self.scale,VyPy.data.scaling.ScalingFunction):
             self.scale = atleast_2d_col(self.scale)
             
-        
-    def function(self,x):
-        raise NotImplementedError
-    
-    def gradient(self,x):
-        raise NotImplementedError
-    
-    def hessian(self,x):
-        raise NotImplementedError
+    def __repr__(self):
+        return "<Constraint '%s'>" % self.tag        
     
     
 # ----------------------------------------------------------------------

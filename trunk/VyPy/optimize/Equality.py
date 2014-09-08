@@ -30,34 +30,18 @@ class Equality(Constraint):
          
     def function(self,x):
         
-        x = self.variables.scaled.unpack_array(x)
-        
-        func = self.evaluator.function
-        tag  = self.tag
-        val  = self.edge
+        edg  = self.edge
         scl  = self.scale
         
-        result = func(x)[tag]
+        result = Constraint.function(self,x)
         
-        result = atleast_2d(result,'col')
-        
-        result = result/scl - val/scl
+        result = result - edg/scl
         
         return result
     
     def gradient(self,x):
         
-        x = self.variables.scaled.unpack_array(x)
-        
-        func = self.evaluator.gradient
-        tag  = self.tag
-        scl  = self.scale
-        
-        result = func(x)[tag]
-        
-        result = atleast_2d(result,'row')
-        
-        result = result / scl ## !!! PROBLEM WHEN SCL is NOT CENTERED
+        result = Constraint.gradient(self,x)
         
         return result    
 

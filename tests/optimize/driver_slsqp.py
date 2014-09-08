@@ -25,8 +25,8 @@ def main():
     #   Get the problem
     # ------------------------------------------------------------------
     
-    from problem_function import setup_problem
-    #from problem_evaluator import setup_problem
+    #from problem_function import setup_problem
+    from problem_evaluator import setup_problem
     problem = setup_problem()
     
     
@@ -57,7 +57,7 @@ def main():
     
     # the checking function
     def check(a,b):
-        return a-b
+        return np.abs(a-b)
     
     delta = truth.do_recursive(check,results)
     

@@ -111,7 +111,7 @@ def main():
     # results
     print 'Bunch:       %.6f s' % (t1)
     print 'SimpleBunch: %.6f s' % (t2)    
-    assert (t1-t2)/t2 < 0.1
+    assert (t1-t2)/t2 < 0.3
     print ''
     
     
@@ -135,7 +135,7 @@ def main():
     # results
     print 'Bunch:       %.6f s' % (t1)
     print 'SimpleBunch: %.6f s' % (t2)    
-    assert (t1-t2)/t2 < 0.1    
+    assert (t1-t2)/t2 < 0.3
     print ''
     
     

@@ -41,6 +41,7 @@ modules = [
     'data/indexable_bunch.py',
     'data/hashed_dict.py',
     'data/data_bunch.py',    
+    'data/object_descriptor.py',
     
     # parallel
     'parallel/operation.py',
@@ -59,6 +60,8 @@ modules = [
     # regression
     'regression/gpr_fit_2d.py',
     'regression/gpr_fit_nd.py',
+    'regression/parabolic.py',
+    'regression/quadratic.py',
     
     # examples
     '../examples/gpr_fit_2d.py',

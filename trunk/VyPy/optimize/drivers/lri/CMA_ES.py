@@ -104,10 +104,7 @@ class CMA_ES(Driver):
         cons = self.constraints(x)
         
         # penalty for constraints
-        if len(cons):
-            result = obj + np.sum( cons**2 ) * 100000.0
-        else:
-            result = obj
+        result = obj + np.sum( cons**2 ) * 100000.0
         
         return result
             
@@ -120,18 +117,14 @@ class CMA_ES(Driver):
         equalities   = self.problem.equalities
         inequalities = self.problem.inequalities
         
-        result = []
-        
+        result = np.empty([0,1])
         for inequality in inequalities:
             res = inequality.function(x)
-            if res < 0.0: res = 0.0
-            result.append(res)
+            res[res < 0.0] = 0.0
+            result = np.vstack([result, res])
         for equality in equalities:
             res = equality.function(x)
-            result.append(res)
-            
-        if result:
-            result = np.vstack(result)
+            result = np.vstack([result, res])      
             
         return result
     

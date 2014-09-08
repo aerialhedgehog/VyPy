@@ -29,22 +29,16 @@ class Inequality(Constraint):
         
     def function(self,x):
         
-        x = self.variables.scaled.unpack_array(x)
-        
-        func = self.evaluator.function
-        tag  = self.tag
         snz  = self.sense
-        val  = self.edge
+        edg  = self.edge
         scl  = self.scale
         
-        result = func(x)[tag]
-        
-        result = atleast_2d(result,'col')
+        result = Constraint.function(self,x)
         
         if snz == '>':
-            result = val/scl - result/scl
+            result = edg/scl - result
         elif snz == '<':
-            result = result/scl - val/scl
+            result = result - edg/scl
         else:
             raise Exception, 'unrecognized sense %s' % snz        
         
@@ -52,21 +46,14 @@ class Inequality(Constraint):
     
     def gradient(self,x):
         
-        x = self.variables.scaled.unpack_array(x)
-        
-        func = self.evaluator.gradient
-        tag  = self.tag
         snz  = self.sense
-        scl  = self.scale
         
-        result = func(x)[tag]
-        
-        result = atleast_2d(result,'row')
+        result = Constraint.gradient(self,x)
         
         if snz == '>':
-            result = -1 * result / scl
+            result = -1 * result
         elif snz == '<':
-            result = +1 * result / scl
+            result = +1 * result
         else:
             raise Exception, 'unrecognized sense %s' % snz        
         

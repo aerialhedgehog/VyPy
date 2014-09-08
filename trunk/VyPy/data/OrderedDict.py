@@ -62,23 +62,34 @@ class OrderedDict(Dict):
         # Or if E is an iterable of items, does:   for k, v in E: od[k] = v
         # In either case, this is followed by:     for k, v in F.items(): od[k] = v        
         
+        # result data structure
+        klass = self.__class__
+        from VyPy.data import DataBunch
+        if isinstance(klass,DataBunch):
+            klass = DataBunch
+            
+        def append_value(key,value):
+            if isinstance(value,dict):
+                value = klass(value)                
+            self[key] = value            
+        
         # a dictionary
         if hasattr(items, 'iterkeys'):
             for key in items.iterkeys():
-                self[key] = items[key]
+                append_value(key,items[key])
+
         elif hasattr(items, 'keys'):
             for key in items.keys():
-                self[key] = items[key]
+                append_value(key,items[key])
                 
         # items lists
         elif items:
             for key, value in items:
-                self[key] = value
+                append_value(key,value)
                 
         # key words
         for key, value in kwds.iteritems():
-            self[key] = value
-
+            append_value(key,value)
 
     def __setitem__(self, key, value):
         """od.__setitem__(i, y) <==> od[i]=y"""
@@ -452,7 +463,10 @@ class OrderedDict(Dict):
         def do_operation(A,B,C):
             for k,a in A.iteritems():
                 if isinstance(B,OrderedDict):
-                    b = B[k]
+                    if B.has_key(k):
+                        b = B[k]
+                    else: 
+                        continue
                 else:
                     b = B
                 # recursion

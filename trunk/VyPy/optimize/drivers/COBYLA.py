@@ -1,1 +1,1 @@
-from scipy import COBYLA
+from .scipy import COBYLA
