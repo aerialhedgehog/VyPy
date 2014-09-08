@@ -123,6 +123,8 @@ class SLSQP(Driver):
         if result:
             result = np.vstack(result)
             result = np.squeeze(result)
+        else:
+            result = np.array([])
         return result
     
     def f_eqcons(self,x):
@@ -134,6 +136,8 @@ class SLSQP(Driver):
         if result:
             result = np.vstack(result)
             result = np.squeeze(result)
+        else:
+            result = np.array([])
         return result
 
     def fprime(self,x):
