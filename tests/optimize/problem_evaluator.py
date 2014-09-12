@@ -30,6 +30,12 @@ def main():
 
 class Test_Evaluator(opt.Evaluator):
     
+    def __init__(self):
+        
+        # cache the function and gradient evals
+        self.function = VyPy.parallel.Remember(self.function)
+        self.gradient = VyPy.parallel.Remember(self.gradient)
+    
     def function(self,inputs):
         
         # unpack inputs
