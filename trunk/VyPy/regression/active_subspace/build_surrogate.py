@@ -15,7 +15,7 @@ def build_surrogate(X,F,DF,XB,dLim=-2,nAS=None,**hypers):
     W,d = as_learn.gradient(DF)
     
     # pick number of dimensions
-    nLim = np.sum( d > 10**dLim )
+    nLim = np.sum( (d/np.linalg.norm(d)) > 10**dLim )
     if nAS is None:
         nAS = nLim
     else:
@@ -34,39 +34,36 @@ def build_surrogate(X,F,DF,XB,dLim=-2,nAS=None,**hypers):
                      np.max(Y,axis=0) ]).T * 1.3
     
     # build the surrogate
-    M_Y = gpr.library.Gaussian(YB,Y,F,DFDY, **hypers )
-    #M_Y = gpr.library.Gaussian(YB,Y,F,None, **hypers )
+    #M_Y = gpr.library.Gaussian(YB,Y,F,DFDY, **hypers )
+    M_Y = gpr.library.Gaussian(YB,Y,F,None, **hypers )
     
     # convenience function handles
-    g_y = M_Y.predict_YI
-    g_x = Active_Subspace_Surrogate(g_y,U)
+    AS_Model = Active_Subspace_Surrogate()
     
-    # pack results
-    results = obunch()
-    results.tag = 'active subspace model'
-    results.XB  = XB
-    results.X   = X
-    results.F   = F
-    results.DF  = DF
-    
-    results.W   = W
-    results.d   = d
-    results.U   = U
-    results.Y   = Y
-    results.YB  = YB
-    
-    results.M_Y = M_Y
-    results.g_x = g_x
-    results.g_y = g_y
-    
-    return results
-    
-class Active_Subspace_Surrogate(object):
-    def __init__(self,g_y,U):
-        self.g_y = g_y
-        self.U = U
         
-    def __call__(self,X):
+    # pack results
+    AS_Model.tag = 'active subspace model'
+    AS_Model.XB  = XB
+    AS_Model.X   = X
+    AS_Model.F   = F
+    AS_Model.DF  = DF
+    
+    AS_Model.W   = W
+    AS_Model.d   = d
+    AS_Model.U   = U
+    AS_Model.Y   = Y
+    AS_Model.YB  = YB
+    
+    AS_Model.M_Y = M_Y
+    
+    return AS_Model
+    
+    
+class Active_Subspace_Surrogate(obunch):
+
+    def g_y(self,Y):
+        return self.M_Y.predict_YI(Y)
+        
+    def g_x(self,X):
         Y = as_project.simple(X,self.U)
-        G = self.g_y(Y)
-        return G
+        return self.g_y(Y)
