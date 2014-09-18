@@ -8,7 +8,6 @@ import VyPy.optimize as opt
 from VyPy.regression.active_subspace import project
 
 # linear programming package
-#import pulp
 import cvxopt.solvers
 cvxopt.solvers.options['show_progress'] = False
 
