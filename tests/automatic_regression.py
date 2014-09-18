@@ -10,8 +10,13 @@
 import VyPy
 from VyPy.data import OrderedBunch
 import sys, os, traceback, time
-import matplotlib.pyplot as plt
 
+try:
+    import pylab as plt
+except ImportError:
+    have_matplotlib = False
+else:
+    have_matplotlib = True
 
 
 # ----------------------------------------------------------------------        
@@ -91,9 +96,9 @@ def main():
     for module in modules:
         passed = test_module(module)
         if passed:
-            results[module] = 'Passed'
+            results[module] = '  Passed'
         else:
-            results[module] = 'Failed'
+            results[module] = '* FAILED'
     
     # final report
     sys.stdout.write('# --------------------------------------------------------------------- \n')
@@ -166,7 +171,7 @@ def test_module(module_path):
     sys.stdout.write('\n')
     
     # cleanup
-    plt.close('all')
+    if have_matplotlib: plt.close('all')
     os.chdir(home_dir)
     
     # make sure to write to stdout

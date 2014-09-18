@@ -5,7 +5,12 @@ import tools
 import data
 
 import sampling
-import plotting
+
+# will fail if matplotlib not installed
+try:
+    import plotting
+except ImportError:
+    pass
 
 import parallel
 import optimize
