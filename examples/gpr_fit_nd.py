@@ -39,6 +39,9 @@ def main():
     ND = 6 # dimensions
     XB = np.array( [[-2.,2.]]*ND )
     
+    # seed the random number generator
+    np.random.seed(256)    
+    
     # ---------------------------------------------------------
     #  Training Data
     # ---------------------------------------------------------

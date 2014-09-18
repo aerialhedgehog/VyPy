@@ -1,6 +1,8 @@
 
 import exceptions
 
+import plugins
+
 import tools
 import data
 

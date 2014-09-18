@@ -14,11 +14,6 @@ except ImportError:
 class CMA_ES(Driver):
     def __init__(self):
         
-        try:
-            import cma
-        except ImportError:
-            raise ImportError, 'Could not import cma, please install with pip: "> pip install cma"'
-        
         Driver.__init__(self)
         
         self.verbose                  = True
@@ -35,7 +30,7 @@ class CMA_ES(Driver):
         assert len(problem.objectives) == 1 , 'too many objectives'
         
         # optimizer
-        import cma
+        from VyPy.plugins import cma
         optimizer = cma.fmin
         
         # inputs

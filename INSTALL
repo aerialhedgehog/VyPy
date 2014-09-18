@@ -44,17 +44,6 @@ The above can be obtained at once with the installation of python
 distributions like "Anaconda" and "Enthought"
 
 
-# Optional Requirements
-
-for gaussian process regression:
-cma        - https://www.lri.fr/~hansen/cma.py (GPL'd)
-
-for active subspace:
-cvxopt     - https://pypi.python.org/pypi/cvxopt/1.1.6
-  windows  - http://www.lfd.uci.edu/~gohlke/pythonlibs/#cvxopt
-
-
-
 # -----------------------------------------------------------
 #   Installation
 # -----------------------------------------------------------
