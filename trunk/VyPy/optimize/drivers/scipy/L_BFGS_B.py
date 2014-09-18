@@ -125,18 +125,18 @@ class L_BFGS_B(Driver):
             
         if result:
             result = np.vstack(result)
-            result = np.squeeze(result)
             
         return result
     
     
     def fprime(self,x):
         
-        obj = self.grad_objective(x)
-        cons = self.grad_constraints(x)
+        dobj  = self.grad_objective(x)
+        cons  = self.constraints(x)
+        dcons = self.grad_constraints(x)
         
         # penalty for constraints
-        result = obj + np.sum( (2. * obj * cons) , axis=0) * 100000.0        
+        result = dobj + np.sum( (2. * cons * dcons) , axis=0) * 100000.0        
         
         result = np.squeeze(result)
         
@@ -154,8 +154,10 @@ class L_BFGS_B(Driver):
         result = []
         
         for inequality in inequalities:
+            res = inequality.function(x)
+            i_feas = res<0.0
             res = inequality.gradient(x)
-            res[res<0.0] = 0.0
+            res[i_feas] = 0.0
             result.append(res)
         for equality in equalities:
             res = equality.gradient(x)
