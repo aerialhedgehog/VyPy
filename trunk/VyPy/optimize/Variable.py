@@ -90,6 +90,10 @@ class Variables(IndexableDict):
             tag = self.next_key(tag)
             variable = Variable(tag,initial,bounds,scale)
             
+        if variable.scale == 'bounds':
+            variable.scale = bounds[1] - bounds[0]
+            scale = variable.scale
+            
         scaled_var = ScaledVariable(tag,initial,bounds,scale)
         variable.scaled = scaled_var
         

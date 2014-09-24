@@ -78,5 +78,3 @@ class Evaluator(object):
                 return outputs 
         """
         raise NotImplementedError
-
-        

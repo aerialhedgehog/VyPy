@@ -19,6 +19,12 @@ class Remember(object):
         self.write_freq = write_freq
         self.name       = name
         
+        # check for instance method
+        try:
+            self._func_self = function.im_self
+        except:
+            self._func_self = None
+        
         # initialize cache from file
         if filename and os.path.exists(filename) and os.path.isfile(filename):
             self.load_cache()
@@ -30,6 +36,7 @@ class Remember(object):
         return
         
     def __func__(self,inputs):
+        # evaluate function
         outputs = self.function(inputs)
         return outputs
         
@@ -67,7 +74,20 @@ class Remember(object):
             raise AttributeError , 'no filename for saving cache'
         save_data(self.__cache__,self.filename)
     
-
+    def __getstate__(self):
+        """ handles an instance method in self.function """
+        state = self.__dict__.copy()
+        if state['_func_self']:
+            state['function']  = state['function'].__name__
+        return state
+    
+    def __setstate__(self,state):
+        """ handles an instance method in self.function """
+        self.__dict__.update(state)
+        if self._func_self:
+            self.function  = getattr( self._func_self , self.function)
+        
+        
 
 
 

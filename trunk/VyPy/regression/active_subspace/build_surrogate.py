@@ -11,7 +11,7 @@ def build_surrogate(X,F,DF,XB,XC=None,dLim=-2,nAS=None,**hypers):
     from VyPy.regression import active_subspace, gpr
     
     if XC is None:
-        XC = XB[None,0,:] * 0.0
+        XC = XB[None,:,0] * 0.0
     
     # learn the active subpace by gradients
     print 'Learn Active Subspaces ...'
