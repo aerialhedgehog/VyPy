@@ -36,7 +36,7 @@ class CMA_ES(Driver):
         # inputs
         func   = self.func
         x0     = problem.variables.scaled.initials_array()
-        x0     = np.squeeze(x0)
+        x0     = np.ravel(x0)
         sigma0 = self.sigma0()
         bounds = problem.variables.scaled.bounds_array()
         bounds = [ bounds[:,0] , bounds[:,1] ]

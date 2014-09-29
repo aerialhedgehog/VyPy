@@ -111,7 +111,7 @@ class Variables(IndexableDict):
             of variables
         """
         
-        values = np.squeeze(values)
+        values = np.ravel(values)
         variables = ibunch(zip(self.keys(),self.initials()))
         variables.unpack_array(values)
         
@@ -128,7 +128,7 @@ class Variables(IndexableDict):
             values = variables.pack_array('vector')
         elif isinstance(variables,iterable_type):
             # already packed
-            values = np.squeeze(variables)  
+            values = np.ravel(variables)  
         else:
             raise Exception, 'could not pack variables: %s' % variables
                 
