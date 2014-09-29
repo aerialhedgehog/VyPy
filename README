@@ -1,5 +1,6 @@
-VyPy
-====
+# ---------------------------------------------------------------------
+#   VyPy
+# ---------------------------------------------------------------------
 
 An Optimization Toolbox
 
@@ -19,3 +20,5 @@ This package contains modules useful for surrogate-based optimization.
     
 Contributing Developers:
     Trent Lukaczyk 
+
+VyPy is available under the BSD License.
