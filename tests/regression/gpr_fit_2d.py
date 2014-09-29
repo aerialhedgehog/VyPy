@@ -145,7 +145,7 @@ def main():
     print '  Testing Error  = %.3f%%' % (EI_rms*100.)
     
     assert ES_rms < 1e-8
-    assert EI_rms < 1e-3
+    assert EI_rms < 3e-3
     
     # Done!
     return
