@@ -42,6 +42,7 @@ class OrderedDict(Dict):
         
         #if len(args) > 1:
             #raise TypeError('expected at most 1 arguments, got %d' % len(args))
+            
         if self.__root is None:
             root = [] # sentinel node
             root[:] = [root, root, None]
@@ -62,15 +63,15 @@ class OrderedDict(Dict):
         # Or if E is an iterable of items, does:   for k, v in E: od[k] = v
         # In either case, this is followed by:     for k, v in F.items(): od[k] = v        
         
-        # result data structure
-        klass = self.__class__
-        from VyPy.data import DataBunch
-        if isinstance(klass,DataBunch):
-            klass = DataBunch
+        ## result data structure
+        #klass = self.__class__
+        #from VyPy.data import DataBunch
+        #if isinstance(klass,DataBunch):
+            #klass = DataBunch
             
         def append_value(key,value):
-            if isinstance(value,dict):
-                value = klass(value)                
+            #if isinstance(value,dict):
+                #value = klass(value)                
             self[key] = value            
         
         # a dictionary
