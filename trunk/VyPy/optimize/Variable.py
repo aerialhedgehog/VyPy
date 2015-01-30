@@ -18,6 +18,8 @@ ibunch = IndexableBunch
 
 iterable_type = (list,tuple,array_type,matrix_type)
 
+from VyPy.data import scaling
+
 
 # ----------------------------------------------------------------------
 #   Variable Object
@@ -91,8 +93,8 @@ class Variables(IndexableDict):
             variable = Variable(tag,initial,bounds,scale)
             
         if variable.scale == 'bounds':
-            variable.scale = bounds[1] - bounds[0]
-            scale = variable.scale
+            scale = scaling.Linear( bounds[1]-bounds[0] , (bounds[1]+bounds[0])/2 )
+            variable.scale = scale
             
         scaled_var = ScaledVariable(tag,initial,bounds,scale)
         variable.scaled = scaled_var

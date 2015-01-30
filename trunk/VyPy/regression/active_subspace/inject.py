@@ -5,11 +5,14 @@ import scipy as sp
 from VyPy.tools import atleast_2d
 from VyPy.exceptions import Infeasible
 import VyPy.optimize as opt
-from VyPy.regression.active_subspace import project
+import project
 
 # linear programming package
-import cvxopt.solvers
-cvxopt.solvers.options['show_progress'] = False
+try:
+    import cvxopt.solvers
+    cvxopt.solvers.options['show_progress'] = False
+except ImportError:
+    warn('could not import package cvxopt')
 
 def simple(basis_as,points_as,bounds_fs):
     

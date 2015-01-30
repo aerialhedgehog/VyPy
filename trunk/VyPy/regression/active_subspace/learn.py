@@ -22,8 +22,6 @@ def linear(X,Y):
     v = a[1:,:]
     v = v / sp.linalg.norm(v)
         
-    v = v.T
-    
     return v
 
 
