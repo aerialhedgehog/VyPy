@@ -122,7 +122,7 @@ class SLSQP(Driver):
             result.append(res)
         if result:
             result = np.vstack(result)
-            result = np.squeeze(result)
+            result = result[:,0]
         else:
             result = np.array([])
         return result
@@ -135,7 +135,7 @@ class SLSQP(Driver):
             result.append(res)
         if result:
             result = np.vstack(result)
-            result = np.squeeze(result)
+            result = result[:,0]
         else:
             result = np.array([])
         return result
