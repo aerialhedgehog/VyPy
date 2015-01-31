@@ -63,11 +63,15 @@ class SLSQP(Driver):
         # printing
         if not self.verbose: iprint = 0
         
+        # constraints?
+        if not problem.constraints.inequalities: f_ieqcons = None
+        if not problem.constraints.equalities:   f_eqcons  = None
+        
         # gradients?
         dobj,dineq,deq = problem.has_gradients()
-        if not dobj : fprime         = None
-        if not dineq: fprime_ieqcons = None
-        if not deq  : fprime_eqcons  = None
+        if not dobj: fprime = None
+        if not (f_ieqcons and dineq): fprime_ieqcons = None
+        if not (f_eqcons  and deq)  : fprime_eqcons  = None
         
         # start timing
         tic = time()
@@ -110,58 +114,37 @@ class SLSQP(Driver):
     def func(self,x):
         objective = self.problem.objectives[0]
         result = objective.function(x)
-        result = np.squeeze(result)
+        result = result[0,0]
         return result
         
     def f_ieqcons(self,x):
         inequalities = self.problem.inequalities
-        result = []
-        for inequality in inequalities:
-            res = inequality.function(x)
-            res = -1 * res
-            result.append(res)
-        if result:
-            result = np.vstack(result)
-            result = result[:,0]
-        else:
-            result = np.array([])
+        result = [ -1.*inequality.function(x) for inequality in inequalities ]
+        result = np.vstack(result)            
+        result = result[:,0]
         return result
     
     def f_eqcons(self,x):
         equalities = self.problem.equalities
-        result = []
-        for equality in equalities:
-            res = equality.function(x)
-            result.append(res)
-        if result:
-            result = np.vstack(result)
-            result = result[:,0]
-        else:
-            result = np.array([])
+        result = [ equality.gradient(x) for equality in equalities ]
+        result = np.vstack(result)
+        result = result[:,0]
         return result
 
     def fprime(self,x):
         objective = self.problem.objectives[0]
         result = objective.gradient(x)
-        result = np.squeeze(result)
+        result = result[0,:]
         return result
     
     def fprime_ieqcons(self,x):
         inequalities = self.problem.inequalities
-        if inequalities:
-            result = [ -1.*inequality.gradient(x) for inequality in inequalities ]
-            result = np.vstack(result)
-            result = np.squeeze(result)
-        else:
-            result = np.empty([x.shape[0]])
+        result = [ -1.*inequality.gradient(x) for inequality in inequalities ]
+        result = np.vstack(result)
         return result
     
     def fprime_eqcons(self,x):
         equalities = self.problem.equalities
-        if equalities:
-            result = [ equality.gradient(x) for equality in equalities ]
-            result = np.vstack(result)
-            result = np.squeeze(result)
-        else:
-            result = np.empty([x.shape[0]])
+        result = [ equality.gradient(x) for equality in equalities ]
+        result = np.vstack(result)
         return result
