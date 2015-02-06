@@ -123,7 +123,7 @@ class Service(mp.Process):
         #   Main Cycle - Continue until Death
         # --------------------------------------------------------------
         while True:
-            
+
             # --------------------------------------------------------------
             #   Check parent process status
             # --------------------------------------------------------------
@@ -174,6 +174,7 @@ class Service(mp.Process):
                 #   Check for kill signal
                 # --------------------------------------------------------------
                 if isinstance(this_input,KillTask.__class__):
+                    self.inbox.task_done()
                     break
                 
                 # report
@@ -239,9 +240,6 @@ class Service(mp.Process):
         # --------------------------------------------------------------
         #   End of Process
         # --------------------------------------------------------------
-        
-        # end joinable inbox task
-        self.inbox.task_done()
         
         # report
         if self.verbose: print '%s: Ending' % name; sys.stdout.flush()
