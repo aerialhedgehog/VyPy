@@ -57,8 +57,8 @@ class SLSQP(Driver):
         iters          = self.max_iterations
         accuracy       = self.objective_accuracy or 1e-6
         
-        # objective scaling
-        accuracy = accuracy
+        ## objective scaling
+        #accuracy = accuracy / problem.objective.scale
         
         # printing
         if not self.verbose: iprint = 0
@@ -126,7 +126,7 @@ class SLSQP(Driver):
     
     def f_eqcons(self,x):
         equalities = self.problem.equalities
-        result = [ equality.gradient(x) for equality in equalities ]
+        result = [ equality.function(x) for equality in equalities ]
         result = np.vstack(result)
         result = result[:,0]
         return result
