@@ -29,10 +29,10 @@ class WrittenQueue(object):
             queue.max_size = max_size
             save(queue,self.filename)
         # add a listener under a filelock
-        with filelock(self.filename,timeout=MASTER_TIMEOUT):
-            queue = load(self.filename)
+        with filelock(self.filename,timeout=MASTER_TIMEOUT) as lock:
+            queue = load(self.filename,lock=lock)
             queue.listeners += 1
-            save(queue,self.filename)
+            save(queue,self.filename,lock=lock)
             
     
     def put( self, task, block=True, timeout=None ):
@@ -40,13 +40,13 @@ class WrittenQueue(object):
         '''
         if not block: timeout = 0.0
         def check():
-            with filelock(self.filename,timeout=0.0):
-                queue = load(self.filename)
-                if queue.unfinished_tasks >= queue.max_size:
+            with filelock(self.filename,timeout=0.0) as lock:
+                queue = load(self.filename,lock=lock)
+                if not queue.max_size is None and queue.unfinished_tasks >= queue.max_size:
                     raise Full
                 queue.unfinished_tasks += 1
                 queue.task_list.append(task)
-                save(queue,self.filename)
+                save(queue,self.filename,lock=lock)
         wait(check,timeout,self.delay )
         
        
@@ -55,11 +55,11 @@ class WrittenQueue(object):
         '''
         if not block: timeout = 0.0
         def check():
-            with filelock(self.filename,timeout=0.0):
-                queue = load(self.filename)
+            with filelock(self.filename,timeout=0.0) as lock:
+                queue = load(self.filename,lock=lock)
                 try: 
-                    task = queue.task_list.pop()
-                    save(queue,self.filename)
+                    task = queue.task_list.pop(0)
+                    save(queue,self.filename,lock=lock)
                 except IndexError:
                     raise Empty
             return task
@@ -69,33 +69,40 @@ class WrittenQueue(object):
     def task_done( self, block=True, timeout=None ):
         if not block: timeout = 0.0
         def check():
-            with filelock(self.filename,timeout=0.0):
-                queue = load(self.filename)
-                
-                if queue.unfinished_tasks <= 0:
+            with filelock(self.filename,timeout=0.0) as lock:
+                queue = load(self.filename,lock=lock)
+                queue.unfinished_tasks -= 1
+                if queue.unfinished_tasks < 0:
                     print 'warning: task_done() called too many times'
-                else: 
-                    queue.unfinished_tasks -= 1
-                save(queue,self.filename)
+                    queue.unfinished_tasks = 0                    
+                save(queue,self.filename,lock=lock)
         wait(check,timeout,self.delay)
         
         
     def join(self):
         def check():
-            with filelock(self.filename,timeout=0.0):
-                queue = load(self.filename)
-                if unfinished_tasks > 0:
+            with filelock(self.filename,timeout=0.0) as lock:
+                queue = load(self.filename,lock=lock)
+                if queue.unfinished_tasks > 0:
                     raise Full
         wait(check,timeout=None,delay=self.delay)
         
+    def empty(self):
+        with filelock(self.filename,timeout=0.0) as lock:
+            queue = load(self.filename,lock=lock)
+            if len(queue.task_list) > 0:
+                return False
+            else:
+                return True
+                    
     def __del__(self):
-        with filelock(self.filename,timeout=MASTER_TIMEOUT):
-            queue = load(self.filename)
+        with filelock(self.filename,timeout=MASTER_TIMEOUT) as lock:
+            queue = load(self.filename,lock=lock)
             queue.listeners -= 1
             if queue.listeners <= 0:
                 os.remove(self.filename)
             else:
-                save(queue,self.filename)
+                save(queue,self.filename,lock=lock)
         
         
 # ----------------------------------------------------------------------
@@ -109,4 +116,22 @@ class QueueData(object):
         self.unfinished_tasks = 0
         self.task_list = []
         self.max_size = None
+        
+    def __str__(self):
+        args = ''
+        
+        args += object.__repr__(self).split(' ')[0].lstrip('<') + '\n'
+        args += '  listeners : %i\n' % self.listeners
+        args += '  unfinished_tasks : %i\n' % self.unfinished_tasks
+        args += '  task_length : %i\n' % len(self.task_list)
+        
+        if not self.max_size:
+            args += '  max_size : %i' % 0
+        else:
+            args += '  max_size : %i' % self.max_size
+        
+        return args
+    
+    def __repr__(self):
+        return self.__str__()
         
