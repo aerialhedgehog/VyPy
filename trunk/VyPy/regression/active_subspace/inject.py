@@ -12,7 +12,7 @@ try:
     import cvxopt.solvers
     cvxopt.solvers.options['show_progress'] = False
 except ImportError:
-    warn('could not import package cvxopt')
+    warn('could not import package cvxopt',ImportWarning)
 
 def simple(basis_as,points_as,bounds_fs):
     
