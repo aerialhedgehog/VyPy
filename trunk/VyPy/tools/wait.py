@@ -6,14 +6,14 @@ import traceback
 
 WARN_TIME = 3600.
 
-def wait(check,timeout=None,delay=0.5):
+def wait(check,timeout=None,delay=0.5, *args,**kwarg):
     
     start_time = time.time()
     warned = False
     
     while True:
         try:
-            result = check()
+            result = check(*args,**kwarg)
             break
         
         except Exception as exc:

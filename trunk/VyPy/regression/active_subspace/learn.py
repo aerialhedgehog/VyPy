@@ -25,9 +25,12 @@ def linear(X,Y):
     return v
 
 
-def gradient(DY):
+def gradient(DY,Y):
     
     DY = atleast_2d(DY)
+    Y = atleast_2d(Y)
+    M = 1. - ((Y-np.min(Y)) / (np.max(Y)-np.min(Y)))
+    M[M<0.5] = 0
     
     #X,Y,DY = scale_data(X,Y,DY)
     
@@ -38,8 +41,9 @@ def gradient(DY):
     
     # emperical covariance matrix
     for i in range(m):
-        dy = DY[[i],:]
-        #dy = dy / np.linalg.norm(dy)  # this is needed for some reason
+        dy = DY[None,i,:]
+        dy = dy / np.linalg.norm(dy)  # this is needed for some reason
+        dy = dy * M[i,0]
         C += np.dot(dy.T,dy)
     C = C/m
     

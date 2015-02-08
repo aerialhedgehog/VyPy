@@ -52,18 +52,17 @@ class WrittenQueue(object):
         ''' put a list of tasks on the queue
         '''
         if not block: timeout = 0.0
-        def check():
+        def check(task_list):
             with filelock(self.filename,timeout=0.0) as lock:
                 queue = load(self.filename,lock=lock,file_format='pickle')
                 
                 if not queue.max_size is None:
-                    n_avail = queue.max_size-queue.unfinished_tasks
-                    this_tasks = [ task_list.pop(0) for i in range(n_avail) ]
+                    n_extend = queue.max_size-queue.unfinished_tasks
                 else:
-                    this_tasks = task_list
-                    task_list = []
+                    n_extend = len(task_list)
+                this_tasks = [ task_list.pop(0) for i in range(n_extend) ]
                 
-                queue.unfinished_tasks += len(this_tasks)
+                queue.unfinished_tasks += n_extend
                 queue.task_list.extend(this_tasks)   
                 
                 if len(this_tasks):
@@ -72,7 +71,7 @@ class WrittenQueue(object):
                 if len(task_list):
                     raise Full
                 
-        wait(check,timeout,self.delay )
+        wait(check,timeout,self.delay, task_list)
         
        
     def get( self, block=True, timeout=None ):
@@ -104,7 +103,7 @@ class WrittenQueue(object):
                     save(queue,self.filename,lock=lock,file_format='pickle')
                 else:
                     raise Empty
-            return task
+            return task_list
         return wait(check,timeout,self.delay)
 
 
