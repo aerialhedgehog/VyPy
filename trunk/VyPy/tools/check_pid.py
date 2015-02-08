@@ -12,9 +12,7 @@ if SYSTEM == 'Windows':
 def check_pid(pid):
     """ checks if pid is alive (True) or dead (False)
     """
-    import time
-    print pid
-    print time.time()    
+    import time  
 
     # windows
     if SYSTEM == 'Windows':
@@ -24,10 +22,8 @@ def check_pid(pid):
         process = kernel32.OpenProcess(SYNCHRONIZE, 0, pid)
         if process != 0:
             kernel32.CloseHandle(process)
-            print 'pid True'
             return True
         else:
-            print 'pid False'
             return False
      
         ## If the process exited recently, a pid may still exist for the handle.
