@@ -8,4 +8,4 @@ try:
     import active_subspace
 except ImportError as exc:
     from warnings import warn
-    warn('could not import VyPy.regression.active_subspace: %s' % exc)
+    warn('could not import VyPy.regression.active_subspace: %s' % exc, ImportWarning)
