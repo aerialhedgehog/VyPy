@@ -104,11 +104,16 @@ class Service(mp.Process):
                     self.__run__()
             else:
                 self.__run__()
+        except (KeyboardInterrupt,SystemExit):
+            if self.verbose: 
+                sys.stderr.write( '%s: Exiting \n' % name )                        
+            raise
         except:
             sys.stderr.write( '%s: Unhandled Exception \n' % self.name )
             sys.stderr.write( traceback.format_exc() )
             sys.stderr.write( '\n' )
             sys.stderr.flush()
+            raise
 
     def __run__(self):
         """ Service.__run__()

@@ -9,6 +9,7 @@ import multiprocessing as mp
 from Service   import Service
 from Remember  import Remember
 from Object    import Object
+from WrittenCache import WrittenCache
 from Operation import Operation
 from Task      import Task
 from KillTask  import KillTask
@@ -38,7 +39,7 @@ class MultiTask(object):
         # initialize function carrier
         if function:
             if isinstance(function,Remember):
-                if not isinstance(function.__cache__,Object):
+                if not isinstance(function.__cache__, (Object,WrittenCache)):
                     function.__cache__ = Object(function.__cache__)
             elif isinstance(function,Service):
                 raise Exception, 'cannot create MultiTask() with a Service()'
@@ -117,6 +118,12 @@ class MultiTask(object):
             ff = [None]
             f = None
             
+        # check for multiple functions
+        if isinstance(func,(list,tuple)): 
+            assert len(func) == len(xx)
+        else:
+            func = [func] * len(xx)
+            
         # submit input
         for i,x in enumerate(xx):
             this_task = Task( inputs = x )
@@ -136,6 +143,25 @@ class MultiTask(object):
                 
         # done
         return f
+    
+    
+    def run_tasks(self,task_list):
+        
+        # submit input
+        for task in task_list:
+            self.put(task)
+                
+        # wait for output, if there's an outbox
+        if self.outbox is None: return
+        results = self.get()
+        
+        # sort output
+        for i,task in enumerate(task_list):
+            task_list[i] = results[task.inputs]
+            
+        # done
+        return task_list
+        
                 
     def put(self,task):
         self.inbox.put( task )            
@@ -155,8 +181,7 @@ class MultiTask(object):
         # pull results
         while not self.outbox.empty():
             task = self.outbox.get()
-            x = task.inputs
-            results[x] = task
+            results[task.inputs] = task
         
         return results
     

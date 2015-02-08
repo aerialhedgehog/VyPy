@@ -4,7 +4,7 @@ import time
 from random import random
 import traceback
 
-WARN_TIME = 30.0
+WARN_TIME = 3600.
 
 def wait(check,timeout=None,delay=0.5):
     
@@ -20,9 +20,9 @@ def wait(check,timeout=None,delay=0.5):
             if timeout and (time.time()-start_time) > timeout:
                 raise exc
             
-            if (time.time()-start_time) > WARN_TIME and not warned:
-                print "wait(): warning, waiting for a long time - \n%s" % traceback.format_exc() 
-                warned = True
+            #if (time.time()-start_time) > WARN_TIME and not warned:
+                #print "wait(): warning, waiting for a long time - \n%s" % traceback.format_exc() 
+                #warned = True
             
         time.sleep( delay*(1.+0.2*random()) )           
             

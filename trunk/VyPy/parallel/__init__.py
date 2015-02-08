@@ -3,6 +3,7 @@
 from Object         import Object
 from ShareableQueue import ShareableQueue
 from WrittenQueue   import WrittenQueue
+from WrittenCache   import WrittenCache
 from Task           import Task
 from KillTask       import KillTask
 from Remote         import Remote
