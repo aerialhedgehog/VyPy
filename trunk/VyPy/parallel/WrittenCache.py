@@ -5,7 +5,7 @@ import os
 
 class WrittenCache(object):
     
-    def __init__( self, filename, initial=None, timeout=10.0, delay=0.5):
+    def __init__( self, filename, initial=None, timeout=None, delay=0.5):
         self.filename = os.path.abspath(filename)
         self.timeout = timeout
         self.delay = delay

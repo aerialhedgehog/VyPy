@@ -164,7 +164,7 @@ class MultiTask(object):
         
                 
     def put(self,task):
-        self.inbox.put( task )            
+        self.inbox.put( task )
         return
         
     def get(self):

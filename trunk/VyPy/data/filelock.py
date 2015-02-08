@@ -53,7 +53,7 @@ class filelock(object):
             except OSError as e:
                 if e.errno != errno.EEXIST:
                     raise 
-                if (time.time() - start_time) >= self.timeout:
+                if not self.timeout is None and (time.time() - start_time) >= self.timeout:
                     raise FileLockException("FileLock timeout occured for %s" % self.lockfile)
                 delay = self.delay*( 1. + 0.2*random() )
                 time.sleep(delay)

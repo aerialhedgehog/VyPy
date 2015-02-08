@@ -48,6 +48,32 @@ class WrittenQueue(object):
                 save(queue,self.filename,lock=lock,file_format='pickle')
         wait(check,timeout,self.delay )
         
+    def put_all( self, task_list, block=True, timeout=None ):
+        ''' put a list of tasks on the queue
+        '''
+        if not block: timeout = 0.0
+        def check():
+            with filelock(self.filename,timeout=0.0) as lock:
+                queue = load(self.filename,lock=lock,file_format='pickle')
+                
+                if not queue.max_size is None:
+                    n_avail = queue.max_size-queue.unfinished_tasks
+                    this_tasks = [ task_list.pop(0) for i in range(n_avail) ]
+                else:
+                    this_tasks = task_list
+                    task_list = []
+                
+                queue.unfinished_tasks += len(this_tasks)
+                queue.task_list.extend(this_tasks)   
+                
+                if len(this_tasks):
+                    save(queue,self.filename,lock=lock,file_format='pickle')
+                
+                if len(task_list):
+                    raise Full
+                
+        wait(check,timeout,self.delay )
+        
        
     def get( self, block=True, timeout=None ):
         ''' get a task from the queue
@@ -60,6 +86,23 @@ class WrittenQueue(object):
                     task = queue.task_list.pop(0)
                     save(queue,self.filename,lock=lock,file_format='pickle')
                 except IndexError:
+                    raise Empty
+            return task
+        return wait(check,timeout,self.delay)
+    
+    
+    def get_all( self, block=True, timeout=None ):
+        ''' get all tasks from the queue
+        '''
+        if not block: timeout = 0.0
+        def check():
+            with filelock(self.filename,timeout=0.0) as lock:
+                queue = load(self.filename,lock=lock,file_format='pickle')
+                if len(queue.task_list): 
+                    task_list = queue.task_list
+                    queue.task_list = []
+                    save(queue,self.filename,lock=lock,file_format='pickle')
+                else:
                     raise Empty
             return task
         return wait(check,timeout,self.delay)
