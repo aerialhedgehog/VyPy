@@ -16,7 +16,7 @@ import sampling
 # will fail if matplotlib not installed
 try:
     import plotting
-except ImportError as exc:
+except (ImportError,RuntimeError) as exc:
     warn('could not import VyPy.plotting: %s' % exc,ImportWarning)
 
 import parallel
