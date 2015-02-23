@@ -212,11 +212,10 @@ class Service(mp.Process):
             # all other exceptions
             except Exception as exc:
                 trace_str = traceback.format_exc()
-                if self.verbose: 
-                    sys.stderr.write( '%s: Task Failed \n' % name )
-                    sys.stderr.write( trace_str )
-                    sys.stderr.write( '\n' )
-                    sys.stderr.flush()
+                sys.stderr.write( '%s: Task Failed \n' % name )
+                sys.stderr.write( trace_str )
+                sys.stderr.write( '\n' )
+                sys.stderr.flush()
                 exc.args = (trace_str,)
                 this_output = exc
                 

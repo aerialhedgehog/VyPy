@@ -321,7 +321,7 @@ class OrderedDict(Dict):
                     do_pack(v) # recursion!
                     continue
                 elif not isinstance( v, valid_types ): continue
-                elif np.rank(v) > 2: continue
+                elif np.ndim(v) > 2: continue
                 # make column vectors
                 v = atleast_2d_col(v)
                 # handle output type
@@ -376,7 +376,7 @@ class OrderedDict(Dict):
         from VyPy.tools.arrays import atleast_2d_col, array_type, matrix_type
         
         # check input type
-        vector = np.rank(M) == 1
+        vector = np.ndim(M) == 1
         
         # valid types for output
         valid_types = ( int, float,
@@ -397,7 +397,7 @@ class OrderedDict(Dict):
                 elif not isinstance(v,valid_types): continue
                 
                 # get this value's rank
-                rank = np.rank(v)
+                rank = np.ndim(v)
                 
                 # get unpack index
                 index = _index[0]                
@@ -446,7 +446,8 @@ class OrderedDict(Dict):
         do_unpack(self)
          
         # check
-        if not M.shape[-1] == _index[0]: warn('did not unpack all values',RuntimeWarning)
+        if not M.shape[-1] == _index[0]: 
+            raise IndexError , 'did not unpack all values'
          
         # done!
         return self
