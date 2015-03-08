@@ -118,11 +118,11 @@ class MultiTask(object):
             ff = [None]
             f = None
             
-        # check for multiple functions
-        if isinstance(func,(list,tuple)): 
-            assert len(func) == len(xx)
-        else:
-            func = [func] * len(xx)
+        ## check for multiple functions
+        #if isinstance(func,(list,tuple)): 
+            #assert len(func) == len(xx)
+        #else:
+            #func = [func] * len(xx)
             
         # submit input
         for i,x in enumerate(xx):
