@@ -56,3 +56,4 @@ nosetests.xml
 .DS_Store
 
 /ide/Wing/*.wpu
+/tests/parallel/*.pkl

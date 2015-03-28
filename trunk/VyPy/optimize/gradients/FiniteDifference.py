@@ -17,22 +17,22 @@ class FiniteDifference(object):
     
     def __init__(self,function,step=1e-6):
         
-        self.function = function
+        self._function = function
         self.step = step
         
         return
     
-    def function(self,xs):
+    def function(self,variables_list):
         
-        nx = xs.shape[0]
+        nx = len(variables_list)
         
-        f = [0]*nx
+        results_list = [0]*nx
         
-        for i,x in xs:
+        for i,variables in enumerate(variables_list):
             
-            f[i] = self.function(x)
+            results_list[i] = self._function(variables)
             
-        return f
+        return results_list
         
         
     def __call__(self,variables):
@@ -52,25 +52,39 @@ class FiniteDifference(object):
         # prepare step
         if not isinstance(step,(array_type,list,tuple)):
             step = [step] * nx
-        step = atleast_2d_col(step)
-        if not step.shape[1] == 1:
+        step = atleast_2d_row(step)
+        if not step.shape[0] == 1:
             step = step.T
         
-        values_run = np.hstack([ values_init , 
-                                 np.tile(values_init,[nx,1]) + np.diag(step) ])
+        values_run = np.vstack([ values_init , 
+                                 np.tile(values_init,[nx,1]) + np.diag(step[0]) ])
+        variables_run = [ deepcopy(variables).unpack_array(val) for val in values_run ]
             
         # run the function
-        results = self.function(values_run)
+        #for i in variables_run: print i
+        results = self.function(variables_run)
+        #for i in results: print i
+        
+        results_values = np.vstack([ atleast_2d_row( res.pack_array('vector') ) for res in results ])
         
         # pack results
-        gradients_values = ( results[1:,:] - results[None,0,:] ) / step
-        gradients_values = np.ravel(gradients_values)
+        gradients_values = ( results_values[1:,:] - results_values[None,0,:] ) / step.T
+        gradients_values = np.ravel( gradients_values )
         
-        variables.unpack_array( values_init * 0.0 )
+        variables = variables.unpack_array( values_init[0] * 0.0 )
         
         gradients = deepcopy(results[0])
-        for k in gradients.keys():
-            gradients[k] = deepcopy(variables)
+        if not isinstance(gradients,obunch):
+            gradients = obunch(gradients)
+            
+        for i,g in gradients.items():
+            if isinstance(g,array_type):
+                g = atleast_2d_col(g)
+            gradients[i] = deepcopy(variables)
+            for j,v in gradients[i].items():
+                if isinstance(v,array_type):
+                    v = atleast_2d_row(v)
+                gradients[i][j] = g * v
         
         gradients.unpack_array(gradients_values)
         

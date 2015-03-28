@@ -11,6 +11,10 @@ from spiders import (
     spider_trace,
 )
 
+from colors import colors
+
+import latex
+
 try:
     from dock import PlotDock
 except:

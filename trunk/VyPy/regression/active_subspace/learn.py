@@ -40,16 +40,22 @@ def gradient(DY,Y):
     C = np.zeros([n,n])
     
     # emperical covariance matrix
-    for i in range(m):
-        dy = DY[None,i,:]
-        dy = dy / np.linalg.norm(dy)  # this is needed for some reason
-        #dy = dy * M[i,0]
-        C += np.dot(dy.T,dy)
-    C = C/m
+    #for i in range(m):
+        #dy = DY[None,i,:]
+        ##dy = dy / np.linalg.norm(dy)  # this is needed for some reason
+        ##dy = dy * M[i,0]
+        #C += np.dot(dy.T,dy)
+        #wait = 0
+    #C = C/m
     
-    # eigenvalue problem, find principle directions
-    [d,W] = np.linalg.eig(C)
-    W = np.real(W)
+    ## eigenvalue problem, find principle directions
+    #[d,W] = np.linalg.eig(C)
+    #W = np.real(W)
+    
+    U, sig, W = np.linalg.svd(DY, full_matrices=False)
+    d = (sig**2) / DY.shape[0]
+    W = W.T
+    W = W*np.sign(W[0,:])    
     
     ## normalize d
     #d = d / np.linalg.norm(d)

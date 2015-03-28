@@ -10,5 +10,6 @@ from Problem    import Problem
 from Remember   import Remember
 
 import drivers
+import gradients
 
 from VyPy.data import scaling
