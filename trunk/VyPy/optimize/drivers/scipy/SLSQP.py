@@ -8,6 +8,7 @@ from VyPy.data import ibunch
 from VyPy.optimize.drivers import Driver
 import numpy as np
 from time import time
+from VyPy.exceptions import MaxEvaluations
 
 try:
     import scipy
@@ -22,15 +23,21 @@ except ImportError:
 
 class SLSQP(Driver):
     def __init__(self):
+        ''' see http://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.fmin_slsqp.html for more info
+        '''
         
         # import check
         import scipy.optimize  
         
         Driver.__init__(self)
         
-        self.verbose        = True
-        self.max_iterations = 1000
+        self.verbose            = True
+        self.max_iterations     = 1000
+        self.max_evaluations    = 10000
         self.objective_accuracy = None
+        
+        self._current_x = None
+        self._current_eval = 0
     
     def run(self,problem):
         
@@ -73,25 +80,36 @@ class SLSQP(Driver):
         if not (f_ieqcons and dineq): fprime_ieqcons = None
         if not (f_eqcons  and deq)  : fprime_eqcons  = None
         
+        # for catching max_evaluations
+        self._current_x = x0
+        
         # start timing
         tic = time()
         
         # run the optimizer
-        x_min,f_min,its,imode,smode = optimizer( 
-            func           = func           ,
-            x0             = x0             ,
-            f_eqcons       = f_eqcons       ,
-            f_ieqcons      = f_ieqcons      ,
-            bounds         = bounds         ,
-            fprime         = fprime         ,
-            fprime_ieqcons = fprime_ieqcons ,
-            fprime_eqcons  = fprime_eqcons  ,
-            iprint         = iprint         ,
-            full_output    = True           ,
-            iter           = iters          ,
-            acc            = accuracy       ,
-            **self.other_options.to_dict()
-        )
+        try: # for catching custom exits
+            x_min,f_min,its,imode,smode = optimizer( 
+                func           = func           ,
+                x0             = x0             ,
+                f_eqcons       = f_eqcons       ,
+                f_ieqcons      = f_ieqcons      ,
+                bounds         = bounds         ,
+                fprime         = fprime         ,
+                fprime_ieqcons = fprime_ieqcons ,
+                fprime_eqcons  = fprime_eqcons  ,
+                iprint         = iprint         ,
+                full_output    = True           ,
+                iter           = iters          ,
+                acc            = accuracy       ,
+                **self.other_options.to_dict()
+            )
+        except MaxEvaluations:
+            its = None  # can't know major iterations unless gradients are provided
+            imode = 10  # custom mode number
+            smode = 'Evaluation limit exceeded'
+            x_min = self._current_x
+            
+        ## TODO - check constraints are met to tolerance, scipy doesn't do this
         
         # stop timing
         toc = time() - tic
@@ -105,6 +123,7 @@ class SLSQP(Driver):
         outputs.messages.exit_flag    = imode
         outputs.messages.exit_message = smode
         outputs.messages.iterations   = its
+        outputs.messages.evaluations  = self._current_eval
         outputs.messages.run_time     = toc
         
         # done!
@@ -112,9 +131,20 @@ class SLSQP(Driver):
             
     
     def func(self,x):
+        
+        # check number of evaluations
+        max_eval = self.max_evaluations
+        if max_eval and max_eval>0 and self._current_eval >= max_eval:
+            raise MaxEvaluations
+        
+        self._current_x = x
+        self._current_eval += 1        
+        
+        # evaluate the objective function
         objective = self.problem.objectives[0]
         result = objective.function(x)
         result = result[0,0]
+        
         return result
         
     def f_ieqcons(self,x):

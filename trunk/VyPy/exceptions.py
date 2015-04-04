@@ -8,6 +8,9 @@ class EvaluationFailure(Exception):
 
 class Infeasible(EvaluationFailure):
     pass
+
+class MaxEvaluations(EvaluationFailure):
+    pass
     
 class ResourceException(Exception):
     pass
