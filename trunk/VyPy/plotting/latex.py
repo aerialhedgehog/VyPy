@@ -24,11 +24,12 @@ def latexify(fig_width=None, fig_height=None, columns=1):
     assert(columns in [1,2])
 
     if fig_width is None:
-        fig_width = 3.39 if columns==1 else 6.9 # width in inches
+        fig_width = 4.0 if columns==1 else 6.9 # width in inches
 
     if fig_height is None:
-        golden_mean = (sqrt(5)-1.0)/2.0    # Aesthetic ratio
-        fig_height = fig_width*golden_mean # height in inches
+        #golden_mean = (sqrt(5)-1.0)/2.0    # Aesthetic ratio
+        #fig_height = fig_width*golden_mean # height in inches
+        fig_height = 3.5
 
     MAX_HEIGHT_INCHES = 8.0
     if fig_height > MAX_HEIGHT_INCHES:
@@ -51,9 +52,13 @@ def latexify(fig_width=None, fig_height=None, columns=1):
 
     matplotlib.rcParams.update(params)
 
+preconfigure = latexify
 
 SPINE_COLOR = 'gray'
-def format_axes(ax):
+def format_axes(ax = None):
+    
+    if ax is None:
+        ax = plt.gca()
     
     #for spine in ['top', 'right']:
         #ax.spines[spine].set_visible(False)
@@ -72,6 +77,8 @@ def format_axes(ax):
 
     return ax
 
-def format_legend_box(lg):
+def format_legend_box(lg=None):
+    if lg is None:
+        lg = plt.gca().get_legend()
     lg.get_frame().set_linewidth(0.5)
     lg.get_frame().set_edgecolor('gray')

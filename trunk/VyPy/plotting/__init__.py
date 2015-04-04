@@ -14,6 +14,7 @@ from spiders import (
 from colors import colors
 
 import latex
+from savefig import savefig
 
 try:
     from dock import PlotDock
