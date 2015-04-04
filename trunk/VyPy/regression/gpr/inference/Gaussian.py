@@ -57,7 +57,7 @@ class Gaussian(Inference):
         
         # almost done
         YI_solve   = np.dot(K3,al) # + np.dot(R.T,B)
-        CovI_solve = np.sqrt( np.abs( diag_K4 - np.array([ np.diag( np.dot(v.T,v) ) ]).T ) ) 
+        CovI_solve = np.sqrt( np.abs( diag_K4 - np.einsum('jk,jk->k',v,v)[:,None] ) )   
         # log probability?
         # lZ = -(y-mu).^2./(sn2+s2)/2 - log(2*pi*(sn2+s2))/2;    % log part function
         

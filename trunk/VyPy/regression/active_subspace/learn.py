@@ -25,10 +25,10 @@ def linear(X,Y):
     return v
 
 
-def gradient(DY,Y):
+def gradient(DY,Y=None):
     
     DY = atleast_2d(DY)
-    Y = atleast_2d(Y)
+    #Y = atleast_2d(Y)
     #M = 1. - ((Y-np.min(Y)) / (np.max(Y)-np.min(Y)))
     #M[M<0.5] = 0
     

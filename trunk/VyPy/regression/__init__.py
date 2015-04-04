@@ -3,6 +3,8 @@ import gpr
 import gpr.library
 import least_squares
 
+from estimate_error import estimate_error
+
 # will fail if cvxopt is not installed
 try:
     import active_subspace

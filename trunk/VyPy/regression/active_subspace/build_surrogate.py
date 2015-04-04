@@ -6,13 +6,14 @@ from VyPy.data import obunch
 import learn as as_learn
 import project as as_project
 
-def build_surrogate(X,F,DF,XB,XC=None,dLim=-2,nAS=None,**hypers):
+def build_surrogate(X,F,DF,XB,XC=None,
+                    dLim=-2,nAS=None,
+                    gpr_grads=True,**hypers):
     
     from VyPy.regression import active_subspace, gpr
     
     if XC is None:
         XC = XB[None,:,0] * 0.0
-        
         
     training_fullspace = gpr.training.Training(XB,X,F,DF)
     scaling_fullspace = gpr.scaling.Linear(training_fullspace)
@@ -29,7 +30,8 @@ def build_surrogate(X,F,DF,XB,XC=None,dLim=-2,nAS=None,**hypers):
     W,d = as_learn.gradient(DF_SCL) # embeded in scaled space
     
     # pick number of dimensions
-    nLim = np.sum( (d/np.linalg.norm(d)) > 10**dLim )
+    #nLim = np.sum( (d/np.linalg.norm(d)) > 10**dLim )
+    nLim = np.sum( d > 10**dLim )
     if nAS is None:
         nAS = nLim
     else:
@@ -49,8 +51,10 @@ def build_surrogate(X,F,DF,XB,XC=None,dLim=-2,nAS=None,**hypers):
                      np.max(Y,axis=0) ]).T * 1.3
     
     # build the surrogate
-    M_Y = gpr.library.Gaussian(YB,Y,F_SCL,DFDY, **hypers )
-    #M_Y = gpr.library.Gaussian(YB,Y,F_SCL,None, **hypers ) # embeded in scaled X
+    if gpr_grads:
+        M_Y = gpr.library.Gaussian(YB,Y,F_SCL,DFDY, **hypers ) # embeded in scaled X
+    else:
+        M_Y = gpr.library.Gaussian(YB,Y,F_SCL,None, **hypers ) # embeded in scaled X
     
     # convenience function handles
     AS_Model = Active_Subspace_Surrogate() # embeded in scaled space!!!
@@ -86,15 +90,17 @@ class Active_Subspace_Surrogate(obunch):
         self.V   = None
         self.XC  = None
         
-
     def g_y(self,Y):
-        return self.M_Y.predict_YI(Y)
+        G_SCL = self.M_Y.predict_YI(Y)
+        G = self.SCL_X.Y.unset_scaling(G_SCL)
+        return G
         
     def g_x(self,X):
         X_SCL  = self.SCL_X.X.set_scaling(X)    # embed in scaled space
         XC_SCL = self.SCL_X.X.set_scaling(self.XC)   
         Y = as_project.simple(X_SCL-XC_SCL,self.U)
-        return self.g_y(Y)
+        G = self.g_y(Y)
+        return G
     
     def z_dist(self,X):
         X_SCL  = self.SCL_X.X.set_scaling(X)
