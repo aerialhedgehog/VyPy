@@ -20,6 +20,7 @@ class CMA_ES(Driver):
         self.print_iterations         = 1
         self.standard_deviation_ratio = 0.10
         self.max_evaluations          = np.inf
+        self.constraint_penalty       = 1.e5
     
     def run(self,problem):
         
@@ -99,7 +100,7 @@ class CMA_ES(Driver):
         cons = self.constraints(x)
         
         # penalty for constraints
-        result = obj + np.sum( cons**2 ) * 100000.0
+        result = obj + np.sum( cons**2 ) * self.constraint_penalty
         
         return result
             

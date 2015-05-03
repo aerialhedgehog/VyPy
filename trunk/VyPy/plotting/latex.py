@@ -73,7 +73,7 @@ def format_axes(ax = None):
     for axis in [ax.xaxis, ax.yaxis]:
         axis.set_tick_params(direction='out', color=SPINE_COLOR)
 
-    plt.tight_layout()
+    #plt.tight_layout()
 
     return ax
 

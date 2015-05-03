@@ -30,6 +30,26 @@ class Logarithmic(ScalingFunction):
         return (self.base**other)*self.scale
     
     
+    
+    
+class Gradient(Logarithmic):    
+    
+    def __init__(self,scale_x=1.0,scale_f=1.0,base=10.0):
+        
+        self.scale_x = scale_x
+        self.scale_f = scale_f
+        self.base   = base    
+    
+    def set_scaling(self,grad,func):
+        return 1. / ( np.log(self.base) * func ) * grad * self.scale_x
+    
+    def unset_scaling(self,grad,func):
+        return grad * ( np.log(self.base) / self.scale_x ) \
+                    * ( (self.base**func) * self.scale_f )
+        
+        
+    
+    
 # ----------------------------------------------------------------------
 #   Module Tests
 # ----------------------------------------------------------------------
