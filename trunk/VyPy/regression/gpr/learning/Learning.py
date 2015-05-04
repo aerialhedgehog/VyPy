@@ -46,7 +46,7 @@ class Learning(object):
         driver = optimize.drivers.CMA_ES()
         driver.verbose                  = False
         driver.standard_deviation_ratio = 0.10
-        driver.max_evaluations          = 100
+        driver.max_evaluations          = 2000
         
         results = driver.run(problem)
         
