@@ -36,6 +36,7 @@ class Linear(ScalingBunch):
         X_scaling  = LinearFunction( Xref[None,0,:] , Xref[None,1,:] )
         Y_scaling  = LinearFunction( Yref[0], Yref[1] )
         DY_scaling = LinearFunction( DYref[None,0,:]  )
+        CovYI_scaling  = LinearFunction( Yref[0] )
         
         # set scaling data keys
         self['XB']     = XB_scaling
@@ -45,7 +46,7 @@ class Linear(ScalingBunch):
         self['XI']     = X_scaling
         self['YI']     = Y_scaling
         self['DYI']    = DY_scaling
-        self['CovYI']  = Y_scaling
+        self['CovYI']  = CovYI_scaling
         self['CovDYI'] = DY_scaling
         
         return
