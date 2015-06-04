@@ -35,14 +35,15 @@ class SLSQP(Driver):
         self.max_iterations     = 1000
         self.max_evaluations    = 10000
         self.objective_accuracy = None
-        
-        self._current_x = None
-        self._current_eval = 0
     
     def run(self,problem):
         
         # store the problem
         self.problem = problem
+
+        # cache
+        self._current_x = None
+        self._current_eval = 0        
         
         # single objective
         assert len(problem.objectives) == 1 , 'too many objectives'
