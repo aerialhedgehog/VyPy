@@ -63,7 +63,7 @@ def install(the_package,version,date):
         license = 'BSD',
         platforms = ['Win, Linux, Unix, Mac OS-X'],
         zip_safe  = False,
-        long_description = read('../README')
+        long_description = read('../README.md')
     )  
     
     return
