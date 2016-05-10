@@ -73,7 +73,7 @@ def atleast_2d(A,oned_as='row'):
         A = np.array(A)
         
     # check rank
-    if np.rank(A) < 2:
+    if np.linalg.matrix_rank(A) < 2:
         # expand row or col
         if oned_as == 'row':
             A = A[None,:]

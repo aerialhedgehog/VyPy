@@ -23,19 +23,22 @@ class Linear(ScalingBunch):
         XB = Train.XB
         _,nx = X.shape
         
+     
         # calculate scaling parameters
-        Xref  = np.array([ XB[:,1] - XB[:,0] , 
-                           XB[:,0]           ])
+        Xref  = np.array([ XB[0,:,1] - XB[0,:,0] , 
+                           XB[0,:,0]           ])
+                          
         Yref  = np.array([ np.max(Y,0)-np.min(Y,0) , 
                            np.min(Y,0)             ])
         DYref = np.array([ Yref[0]/Xref[0,:] , 
                            np.zeros([nx]) ])
-
+        print 'DYref=', DYref
+        print 'DYref[1]=', DYref[1]
         # build scaling functions
         XB_scaling = LinearFunction( Xref[0,:,None] , Xref[1,:,None] )
         X_scaling  = LinearFunction( Xref[None,0,:] , Xref[None,1,:] )
         Y_scaling  = LinearFunction( Yref[0], Yref[1] )
-        DY_scaling = LinearFunction( DYref[None,0,:]  )
+        DY_scaling = LinearFunction( DYref[0,:]  )
         
         # set scaling data keys
         self['XB']     = XB_scaling

@@ -19,10 +19,17 @@ class Training(IndexableBunch):
         Y  = atleast_2d_col(Y)
         
         # sizes
-        ntx ,nx  = X.shape
-        nty ,ny  = Y.shape
+        #ntx ,nx  = X.shape
+        ntxs     = X.shape
+        ntx      = ntxs[0]
+        nx       = ntxs[1]
+        
+        ntys     = Y.shape
+        #nty ,ny  = Y.shape
+        nty      = ntys[0]
+        ny       = ntys[1]
         assert ntx == nty        , 'different training data X and targets Y'
-        assert XB.shape[0] == nx , 'different training data X and bounds XB dimension'
+        assert XB.shape[1] == nx , 'different training data X and bounds XB dimension'
         assert ny == 1           , 'training targets Y must be a column vector'
         
         # handle optional gradients
