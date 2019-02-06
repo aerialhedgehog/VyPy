@@ -5,7 +5,7 @@
 
 from Evaluator import Evaluator
 
-from VyPy.data import IndexableDict
+from VyPy.data import IndexableDict, OrderedDict
 from VyPy.tools.arrays import atleast_2d_col, atleast_2d_row
 
 import numpy as np
@@ -46,7 +46,13 @@ class Objective(Evaluator):
         tag  = self.tag
         scl  = self.scale
         
-        result = func(x)[tag]
+        if x.keys() == ['vector']:
+            x = x['vector']
+            
+        result = func(x)
+        
+        if isinstance(result,dict):
+            result = result[tag]
         
         result = atleast_2d_col(result)
         
@@ -62,11 +68,20 @@ class Objective(Evaluator):
         tag  = self.tag
         fscl = self.scale
         
-        res = func(x)[tag]
+        if x.keys() == ['vector']:
+            x = x['vector']
+            
+        res = func(x)
         
-        result = [ atleast_2d_row(res[k]) * self.variables[k].scale 
-                   for k in self.variables.keys() ]
-        result = np.hstack(result)
+        if isinstance(res,dict):
+            res = res[tag]
+        
+        if isinstance(res,dict):
+            result = [ atleast_2d_row(res[k]) * self.variables[k].scale 
+                       for k in self.variables.keys() ]
+            result = np.hstack(result)
+        else:
+            result = atleast_2d_row(res)
         
         result = result / fscl ## !!! PROBLEM WHEN SCL is NOT CENTERED
         

@@ -42,16 +42,22 @@ def lhc_uniform(XB,NI,XI=None,maxits=100):
         # add initial points
         XX = np.vstack([ XI , XS ])
         
-        # calc distances
-        vecdiff = vector_distance(XX)[0]
-        
-        # update
-        if vecdiff > mindiff:
-            mindiff = vecdiff
+        if maxits > 1:  
+            
+            # calc distances
+            vecdiff = vector_distance(XX)[0]
+            
+            # update
+            if vecdiff > mindiff:
+                mindiff = vecdiff
+                XO = XX
+                
+        else:
             XO = XX
         
     #: for iterate
     
-    print '  Minimum Distance = %.4g' % mindiff
+    if maxits > 1:
+        print '  Minimum Distance = %.4g' % mindiff
     
     return XO

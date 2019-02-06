@@ -104,11 +104,16 @@ class Service(mp.Process):
                     self.__run__()
             else:
                 self.__run__()
+        except (KeyboardInterrupt,SystemExit):
+            if self.verbose: 
+                sys.stderr.write( '%s: Exiting \n' % name )                        
+            raise
         except:
             sys.stderr.write( '%s: Unhandled Exception \n' % self.name )
             sys.stderr.write( traceback.format_exc() )
             sys.stderr.write( '\n' )
             sys.stderr.flush()
+            raise
 
     def __run__(self):
         """ Service.__run__()
@@ -123,7 +128,7 @@ class Service(mp.Process):
         #   Main Cycle - Continue until Death
         # --------------------------------------------------------------
         while True:
-            
+
             # --------------------------------------------------------------
             #   Check parent process status
             # --------------------------------------------------------------
@@ -174,6 +179,7 @@ class Service(mp.Process):
                 #   Check for kill signal
                 # --------------------------------------------------------------
                 if isinstance(this_input,KillTask.__class__):
+                    self.inbox.task_done()
                     break
                 
                 # report
@@ -206,11 +212,10 @@ class Service(mp.Process):
             # all other exceptions
             except Exception as exc:
                 trace_str = traceback.format_exc()
-                if self.verbose: 
-                    sys.stderr.write( '%s: Task Failed \n' % name )
-                    sys.stderr.write( trace_str )
-                    sys.stderr.write( '\n' )
-                    sys.stderr.flush()
+                sys.stderr.write( '%s: Task Failed \n' % name )
+                sys.stderr.write( trace_str )
+                sys.stderr.write( '\n' )
+                sys.stderr.flush()
                 exc.args = (trace_str,)
                 this_output = exc
                 
@@ -239,9 +244,6 @@ class Service(mp.Process):
         # --------------------------------------------------------------
         #   End of Process
         # --------------------------------------------------------------
-        
-        # end joinable inbox task
-        self.inbox.task_done()
         
         # report
         if self.verbose: print '%s: Ending' % name; sys.stdout.flush()

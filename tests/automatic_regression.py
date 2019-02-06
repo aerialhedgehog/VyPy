@@ -52,7 +52,8 @@ modules = [
     'parallel/operation.py',
     'parallel/remember.py',
     'parallel/multitask.py',
-    'parallel/multiremember.py',    
+    'parallel/multiremember.py',
+    'parallel/writtenqueue.py',
     
     # optimize
     'optimize/problem_function.py',

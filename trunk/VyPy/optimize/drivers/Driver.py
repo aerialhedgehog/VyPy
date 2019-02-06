@@ -35,20 +35,28 @@ class Driver(object):
         outputs.success      = False
         outputs.messages     = ibunch()
         
-                
         # varaiables
         outputs.variables = vars_min
         
+        if vars_min.keys() == ['vector']:
+            vars_min = vars_min['vector']           
+        
         # objectives
         for tag in objectives.tags():
-            outputs.objectives[tag] = objectives[tag].evaluator.function(vars_min)[tag]
+            result = objectives[tag].evaluator.function(vars_min)
+            if isinstance(result,dict): result = result[tag]
+            outputs.objectives[tag] = result
         
         # equalities
         for tag in equalities.tags():
-            outputs.equalities[tag] = equalities[tag].evaluator.function(vars_min)[tag]
+            result = equalities[tag].evaluator.function(vars_min)
+            if isinstance(result,dict): result = result[tag]
+            outputs.equalities[tag] = result
             
         # inequalities
         for tag in inequalities.tags():
-            outputs.inequalities[tag] = inequalities[tag].evaluator.function(vars_min)[tag]
+            result = inequalities[tag].evaluator.function(vars_min)
+            if isinstance(result,dict): result = result[tag]
+            outputs.inequalities[tag] = result
             
         return outputs

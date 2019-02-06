@@ -90,7 +90,7 @@ class DataBunch(IndexableBunch):
         return args
         
     def __repr__(self):
-        return self.__str__()
+        return self.dataname()
     
     def append(self,value,key=None):
         if key is None: key = value.tag
@@ -141,7 +141,34 @@ class DataBunch(IndexableBunch):
     def dataname(self):
         return "<data object '" + self.typestring() + "'>"
 
+    def deep_set(self,keys,val):
+        
+        if isinstance(keys,str):
+            keys = keys.split('.')
+        
+        data = self
+         
+        if len(keys) > 1:
+            for k in keys[:-2]:
+                data = data[k]
+        
+        data[ keys[-1] ] = value
 
+    def deep_get(self,keys):
+        
+        if isinstance(keys,str):
+            keys = keys.split('.')
+        
+        data = self
+         
+        if len(keys) > 1:
+            for k in keys[:-2]:
+                data = data[k]
+        
+        value = data[ keys[-1] ]
+        
+        return value
+        
     
 # ----------------------------------------------------------------------
 #   Module Tests

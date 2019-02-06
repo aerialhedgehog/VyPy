@@ -15,7 +15,8 @@ from filelock import filelock
 
 def load_data( file_name, 
                file_format = 'infer'       ,
-               core_name   = 'python_data'  ):
+               core_name   = 'python_data' ,
+               lock        = None ):
     """ data = load_data( file_name,
                           file_format = 'infer'       ,
                           core_name   = 'python_data'  )
@@ -53,7 +54,8 @@ def load_data( file_name,
     assert file_format in ['matlab','pickle'] , 'unsupported file format'
         
     # get filelock
-    with filelock(file_name):    
+    lock = lock or filelock(file_name)
+    with lock:    
     
         # LOAD MATLAB
         if file_format == 'matlab' and scipy_loaded:
@@ -91,7 +93,8 @@ def load_data( file_name,
 
 def save_data( data_dict, file_name, append=False ,
                file_format = 'infer'              ,
-               core_name='python_data'             ):
+               core_name='python_data'            ,
+               lock = None                        ):
     """ save_data( data_dict, file_name, append=False ,
                    file_format = 'infer'              ,
                    core_name='python_data'             ):
@@ -130,7 +133,8 @@ def save_data( data_dict, file_name, append=False ,
     assert file_format in ['matlab','pickle'] , 'unsupported file format'
 
     # get filelock
-    with filelock(file_name):
+    lock = lock or filelock(file_name)
+    with lock:
         
         # if appending needed 
         # TODO: don't overwrite other core_names

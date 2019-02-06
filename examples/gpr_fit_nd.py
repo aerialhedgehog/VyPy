@@ -19,7 +19,7 @@ import VyPy
 from VyPy.regression import gpr
 
 from warnings import warn, simplefilter
-simplefilter('error')
+simplefilter('ignore')
 
 # ------------------------------------------------------------
 #   Main 

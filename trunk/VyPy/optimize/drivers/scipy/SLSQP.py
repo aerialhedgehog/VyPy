@@ -8,6 +8,7 @@ from VyPy.data import ibunch
 from VyPy.optimize.drivers import Driver
 import numpy as np
 from time import time
+from VyPy.exceptions import MaxEvaluations
 
 try:
     import scipy
@@ -22,20 +23,27 @@ except ImportError:
 
 class SLSQP(Driver):
     def __init__(self):
+        ''' see http://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.fmin_slsqp.html for more info
+        '''
         
         # import check
         import scipy.optimize  
         
         Driver.__init__(self)
         
-        self.verbose        = True
-        self.max_iterations = 1000
+        self.verbose            = True
+        self.max_iterations     = 1000
+        self.max_evaluations    = 10000
         self.objective_accuracy = None
     
     def run(self,problem):
         
         # store the problem
         self.problem = problem
+
+        # cache
+        self._current_x = None
+        self._current_eval = 0        
         
         # single objective
         assert len(problem.objectives) == 1 , 'too many objectives'
@@ -57,37 +65,52 @@ class SLSQP(Driver):
         iters          = self.max_iterations
         accuracy       = self.objective_accuracy or 1e-6
         
-        # objective scaling
-        accuracy = accuracy
+        ## objective scaling
+        #accuracy = accuracy / problem.objective.scale
         
         # printing
         if not self.verbose: iprint = 0
         
+        # constraints?
+        if not problem.constraints.inequalities: f_ieqcons = None
+        if not problem.constraints.equalities:   f_eqcons  = None
+        
         # gradients?
         dobj,dineq,deq = problem.has_gradients()
-        if not dobj : fprime         = None
-        if not dineq: fprime_ieqcons = None
-        if not deq  : fprime_eqcons  = None
+        if not dobj: fprime = None
+        if not (f_ieqcons and dineq): fprime_ieqcons = None
+        if not (f_eqcons  and deq)  : fprime_eqcons  = None
+        
+        # for catching max_evaluations
+        self._current_x = x0
         
         # start timing
         tic = time()
         
         # run the optimizer
-        x_min,f_min,its,imode,smode = optimizer( 
-            func           = func           ,
-            x0             = x0             ,
-            f_eqcons       = f_eqcons       ,
-            f_ieqcons      = f_ieqcons      ,
-            bounds         = bounds         ,
-            fprime         = fprime         ,
-            fprime_ieqcons = fprime_ieqcons ,
-            fprime_eqcons  = fprime_eqcons  ,
-            iprint         = iprint         ,
-            full_output    = True           ,
-            iter           = iters          ,
-            acc            = accuracy       ,
-            **self.other_options.to_dict()
-        )
+        try: # for catching custom exits
+            x_min,f_min,its,imode,smode = optimizer( 
+                func           = func           ,
+                x0             = x0             ,
+                f_eqcons       = f_eqcons       ,
+                f_ieqcons      = f_ieqcons      ,
+                bounds         = bounds         ,
+                fprime         = fprime         ,
+                fprime_ieqcons = fprime_ieqcons ,
+                fprime_eqcons  = fprime_eqcons  ,
+                iprint         = iprint         ,
+                full_output    = True           ,
+                iter           = iters          ,
+                acc            = accuracy       ,
+                **self.other_options.to_dict()
+            )
+        except MaxEvaluations:
+            its = None  # can't know major iterations unless gradients are provided
+            imode = 10  # custom mode number
+            smode = 'Evaluation limit exceeded'
+            x_min = self._current_x
+            
+        ## TODO - check constraints are met to tolerance, scipy doesn't do this
         
         # stop timing
         toc = time() - tic
@@ -101,6 +124,7 @@ class SLSQP(Driver):
         outputs.messages.exit_flag    = imode
         outputs.messages.exit_message = smode
         outputs.messages.iterations   = its
+        outputs.messages.evaluations  = self._current_eval
         outputs.messages.run_time     = toc
         
         # done!
@@ -108,60 +132,50 @@ class SLSQP(Driver):
             
     
     def func(self,x):
+        
+        # check number of evaluations
+        max_eval = self.max_evaluations
+        if max_eval and max_eval>0 and self._current_eval >= max_eval:
+            raise MaxEvaluations
+        
+        self._current_x = x
+        self._current_eval += 1        
+        
+        # evaluate the objective function
         objective = self.problem.objectives[0]
         result = objective.function(x)
-        result = np.squeeze(result)
+        result = result[0,0]
+        
         return result
         
     def f_ieqcons(self,x):
         inequalities = self.problem.inequalities
-        result = []
-        for inequality in inequalities:
-            res = inequality.function(x)
-            res = -1 * res
-            result.append(res)
-        if result:
-            result = np.vstack(result)
-            result = np.squeeze(result)
-        else:
-            result = np.array([])
+        result = [ -1.*inequality.function(x) for inequality in inequalities ]
+        result = np.vstack(result)            
+        result = result[:,0]
         return result
     
     def f_eqcons(self,x):
         equalities = self.problem.equalities
-        result = []
-        for equality in equalities:
-            res = equality.function(x)
-            result.append(res)
-        if result:
-            result = np.vstack(result)
-            result = np.squeeze(result)
-        else:
-            result = np.array([])
+        result = [ equality.function(x) for equality in equalities ]
+        result = np.vstack(result)
+        result = result[:,0]
         return result
 
     def fprime(self,x):
         objective = self.problem.objectives[0]
         result = objective.gradient(x)
-        result = np.squeeze(result)
+        result = result[0,:]
         return result
     
     def fprime_ieqcons(self,x):
         inequalities = self.problem.inequalities
-        if inequalities:
-            result = [ -1.*inequality.gradient(x) for inequality in inequalities ]
-            result = np.vstack(result)
-            result = np.squeeze(result)
-        else:
-            result = np.empty([x.shape[0]])
+        result = [ -1.*inequality.gradient(x) for inequality in inequalities ]
+        result = np.vstack(result)
         return result
     
     def fprime_eqcons(self,x):
         equalities = self.problem.equalities
-        if equalities:
-            result = [ equality.gradient(x) for equality in equalities ]
-            result = np.vstack(result)
-            result = np.squeeze(result)
-        else:
-            result = np.empty([x.shape[0]])
+        result = [ equality.gradient(x) for equality in equalities ]
+        result = np.vstack(result)
         return result

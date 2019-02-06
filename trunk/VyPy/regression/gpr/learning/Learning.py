@@ -41,17 +41,17 @@ class Learning(object):
         problem = optimize.Problem()
         problem = self.setup(problem)
         
-        # Run Global Optimization
-        print '  Global Optimization (CMA_ES)'
-        driver = optimize.drivers.CMA_ES()
-        driver.verbose                  = False
-        driver.standard_deviation_ratio = 0.10
-        driver.max_evaluations          = 1000
+        ## Run Global Optimization
+        #print '  Global Optimization (CMA_ES)'
+        #driver = optimize.drivers.CMA_ES()
+        #driver.verbose                  = False
+        #driver.standard_deviation_ratio = 0.10
+        #driver.max_evaluations          = 2000
         
-        results = driver.run(problem)
+        #results = driver.run(problem)
         
-        # setup next problem
-        problem.variables.set(initials=results.variables)
+        ## setup next problem
+        #problem.variables.set(initials=results.variables)
         problem.objectives['logP'].scale = -1.0e-2
         
         # Run Local Refinement
